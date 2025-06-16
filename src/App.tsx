@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 // API'nızın çalıştığı temel URL
 // ÖNEMLİ: Kendi Azure App Service URL'nizi buraya yazın.
-const API_BASE_URL = 'https://oktaysactasarim-api-live.azurewebsites.net/api'; // Kendi API URL'nizle DEĞİŞTİRİN!
+const API_BASE_URL = 'https://berberrandevuapi20250616204455.azurewebsites.net'; // Kendi API URL'nizle DEĞİŞTİRİN!
 
 // Servis verilerini temsil eden arayüz (API'den gelen veriye göre camelCase)
 interface Service {
