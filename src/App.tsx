@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 // API'nızın çalıştığı temel URL
-// Genellikle ASP.NET Core projelerinde 7075 (HTTPS) veya 5000/5001 (HTTP) gibi bir port kullanılır.
-// Lütfen kendi API'nızın çalıştığı doğru URL'yi kontrol edin.
-const API_BASE_URL = 'https://localhost:7075/api';
+// ÖNEMLİ: Kendi Azure App Service URL'nizi buraya yazın.
+const API_BASE_URL = 'https://oktaysactasarim-api-live.azurewebsites.net/api'; // Kendi API URL'nizle DEĞİŞTİRİN!
 
 // Servis verilerini temsil eden arayüz (API'den gelen veriye göre camelCase)
 interface Service {
@@ -297,9 +296,6 @@ function App() {
       const responseData = await response.json();
       // Veriyi doğrudan kullan, $values veya benzeri bir sarıcı varsa kaldırıldı
       const data: Service[] = responseData.$values || responseData; // API'niz $values dönüyorsa hala bu satır kalsın
-
-      // Hata ayıklama için: API'den gelen ham servis verisini konsola yazdır
-      console.log('API\'den çekilen ham servis verisi:', data);
 
       // Servisleri servisAdi'ye göre sırala
       data.sort((a, b) => (a.servisAdi || '').localeCompare(b.servisAdi || ''));
@@ -719,8 +715,9 @@ function App() {
     const radius = 50;
     const circumference = 2 * Math.PI * radius;
 
-    const revenueOffset = circumference - (revenuePercentage / 100) * circumference;
-    const expensesOffset = circumference - (expensesPercentage / 100) * circumference;
+    // expensesOffset değeri burada kullanılıyor
+    // 'expensesOffset' is assigned a value but never used hatasını çözmek için düzeltildi
+    const expensesStrokeDashoffset = circumference - (expensesPercentage / 100) * circumference; 
 
     return (
       <div className="flex flex-col items-center justify-center p-4">
@@ -735,7 +732,7 @@ function App() {
               stroke="#ef4444" // Kırmızı
               strokeWidth="20"
               strokeDasharray={circumference}
-              strokeDashoffset={circumference - (expensesPercentage / 100) * circumference}
+              strokeDashoffset={expensesStrokeDashoffset} // Düzeltilen kullanım
               transform={`rotate(-90 50 50)`}
               style={{ transition: 'stroke-dashoffset 0.5s ease-out' }}
             />
@@ -751,7 +748,7 @@ function App() {
               stroke="#22c55e" // Yeşil
               strokeWidth="20"
               strokeDasharray={circumference}
-              strokeDashoffset={revenueOffset}
+              strokeDashoffset={circumference - (revenuePercentage / 100) * circumference} // Bu kısım zaten doğruydu
               transform={`rotate(${expensesPercentage * 3.6 - 90} 50 50)`} // Önce giderler, sonra gelirler
               style={{ transition: 'stroke-dashoffset 0.5s ease-out' }}
             />
