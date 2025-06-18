@@ -1,16 +1,17 @@
 {
-    "navigationFallback": {
-      "rewrite": "/index.html",
-      "exclude": [
-        "/images/*.{png,jpg,jpeg}",
-        "/css/*"
-      ]
-    },
-    "routes": [
-      {
-        "route": "/admin/login",
-        "serve": "/index.html",
-        "statusCode": 200
-      }
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/images/*.{png,jpg,jpeg}",
+      "/css/*",
+      "/static/*"
     ]
-  }
+  },
+  "routes": [
+    {
+      "route": "/admin/login",
+      "serve": "/index.html",
+      "statusCode": 200
+    }
+  ]
+}

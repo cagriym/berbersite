@@ -16,7 +16,7 @@ jobs:
     name: Build and Deploy Job
     permissions:
        id-token: write
-       contents: read
+       contents: write
     steps:
       - uses: actions/checkout@v3
         with:
