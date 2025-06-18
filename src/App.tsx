@@ -49,12 +49,12 @@ function App() {
   const [services, setServices] = useState<Service[]>([]); // Servis listesi
   const [loading, setLoading] = useState(false); // Genel yüklenme durumu
 
-  // Telefon doğrulama için state'ler (Bu kısım şu an client-side simülasyonu)
-  const [verificationCode, setVerificationCode] = useState('');
+  // Telefon doğrulama için state'ler (Bu kısım API ile haberleşecek şekilde güncellendi)
   const [enteredCode, setEnteredCode] = useState('');
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
-  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false); // Kod gönderme spinner'ı için
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false); // Kod doğrulama spinner'ı için
 
   // Genel mesaj ve mesaj tipi state'leri (hem form hem admin için)
   const [message, setMessage] = useState('');
@@ -126,14 +126,13 @@ function App() {
     setSelectedDate(new Date().toISOString().split('T')[0]);
     setSelectedTime('09:00');
     setSelectedServiceId(services.length > 0 ? services[0].servisID : null);
-    setVerificationCode('');
     setEnteredCode('');
     setIsCodeSent(false);
     setIsPhoneVerified(false);
   };
 
-  // Telefon doğrulama kodu gönderme (geçici - konsola yazdırılır)
-  const handleSendCode = () => {
+  // Telefon doğrulama kodu gönderme (API ile)
+  const handleSendCode = async () => {
     const cleanedPhone = phone.replace(/\D/g, '');
     if (cleanedPhone.length !== 10) {
       setMessage('Lütfen geçerli bir 10 haneli telefon numarası girin.');
@@ -141,36 +140,84 @@ function App() {
       return;
     }
 
-    setIsSendingCode(true);
+    setIsSendingCode(true); // Spinner'ı etkinleştir
     setMessage('');
     setMessageType('');
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    setVerificationCode(code);
+    try {
+      const response = await fetch(`${API_BASE_URL}/PhoneVerification/send-code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phoneNumber: cleanedPhone }),
+      });
 
-    setTimeout(() => {
-      console.log(`Telefon doğrulama kodu gönderildi: ${code}`);
-      setMessage(`Doğrulama kodu telefonunuza gönderildi. Lütfen konsolu kontrol edin. Kod: ${code}`);
-      setMessageType('success');
-      setIsCodeSent(true);
-      setIsSendingCode(false);
-    }, 1500);
-  };
-
-  // Telefon doğrulama kodu kontrolü
-  const handleVerifyCode = () => {
-    setMessage('');
-    setMessageType('');
-    if (enteredCode === verificationCode) {
-      setMessage('Telefon numaranız başarıyla doğrulandı!');
-      setMessageType('success');
-      setIsPhoneVerified(true);
-    } else {
-      setMessage('Yanlış doğrulama kodu. Lütfen tekrar deneyin.');
+      if (response.ok) {
+        setMessage('Doğrulama kodu telefonunuza gönderildi.');
+        setMessageType('success');
+        setIsCodeSent(true);
+      } else {
+        const errorData = await response.json();
+        setMessage(errorData.message || 'Kod gönderilemedi. Lütfen tekrar deneyin.');
+        setMessageType('error');
+        setIsCodeSent(false);
+      }
+    } catch (error) {
+      console.error('Doğrulama kodu gönderilirken hata oluştu:', error);
+      setMessage('Kod gönderilirken bir hata oluştu. Lütfen ağ bağlantınızı kontrol edin.');
       setMessageType('error');
-      setIsPhoneVerified(false);
+      setIsCodeSent(false);
+    } finally {
+      setIsSendingCode(false); // Spinner'ı devre dışı bırak
     }
   };
+
+  // Telefon doğrulama kodu kontrolü (API ile)
+  const handleVerifyCode = async () => {
+    setMessage('');
+    setMessageType('');
+
+    if (!enteredCode || enteredCode.length !== 6) {
+      setMessage('Lütfen 6 haneli doğrulama kodunu girin.');
+      setMessageType('error');
+      return;
+    }
+
+    setIsVerifyingCode(true); // Spinner'ı etkinleştir
+
+    const cleanedPhone = phone.replace(/\D/g, '');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/PhoneVerification/verify-code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phoneNumber: cleanedPhone, code: enteredCode }),
+      });
+
+      if (response.ok) {
+        setMessage('Telefon numaranız başarıyla doğrulandı!');
+        setMessageType('success');
+        setIsPhoneVerified(true);
+        setIsCodeSent(false); // Kod doğrulandıktan sonra kod gönderme alanını gizle
+      } else {
+        const errorData = await response.json();
+        setMessage(errorData.message || 'Yanlış doğrulama kodu. Lütfen tekrar deneyin.');
+        setMessageType('error');
+        setIsPhoneVerified(false);
+      }
+    } catch (error) {
+      console.error('Doğrulama kodu doğrulanırken hata oluştu:', error);
+      setMessage('Kod doğrulanırken bir hata oluştu. Lütfen ağ bağlantınızı kontrol edin.');
+      setMessageType('error');
+      setIsPhoneVerified(false);
+    } finally {
+      setIsVerifyingCode(false); // Spinner'ı devre dışı bırak
+    }
+  };
+
 
   // Randevu gönderme işlemi (Genel Randevu Formu için)
   const handleSubmit = async (e: React.FormEvent) => {
@@ -829,9 +876,11 @@ function App() {
                       className="flex-grow px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-base transition duration-200 ease-in-out hover:border-amber-400"
                       value={phone}
                       onChange={(e) => {
+                        // Telefon değiştiğinde doğrulamayı sıfırla
                         setPhone(e.target.value);
-                        setIsCodeSent(false); // Telefon değiştiğinde doğrulamayı sıfırla
+                        setIsCodeSent(false); 
                         setIsPhoneVerified(false);
+                        setEnteredCode(''); // Kodu da sıfırla
                         setMessage('');
                         setMessageType('');
                       }}
@@ -874,18 +923,26 @@ function App() {
                         onChange={(e) => setEnteredCode(e.target.value)}
                         maxLength={6}
                         required
+                        disabled={isVerifyingCode} // Doğrulama sırasında devre dışı bırak
                       />
                       <button
                         type="button"
                         onClick={handleVerifyCode}
                         className={`px-4 py-2 rounded-lg shadow-md text-white font-medium transition duration-300 ease-in-out transform hover:scale-105 ${
-                          enteredCode.length === 6
+                          enteredCode.length === 6 && !isVerifyingCode
                             ? 'bg-green-500 hover:bg-green-600 focus:ring-green-500'
                             : 'bg-gray-400 cursor-not-allowed'
                         }`}
-                        disabled={enteredCode.length !== 6}
+                        disabled={enteredCode.length !== 6 || isVerifyingCode}
                       >
-                        Kodu Doğrula
+                        {isVerifyingCode ? (
+                            <svg className="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        ) : (
+                            'Kodu Doğrula'
+                        )}
                       </button>
                     </div>
                   )}
@@ -940,8 +997,6 @@ function App() {
                       required
                     >
                       {services.map((service) => {
-                         // Her bir servis objesini konsola yazdır, debugging için
-                         // console.log('Rendering Service:', service); // Artık gerekmeyebilir
                          return (
                             <option key={service.servisID} value={service.servisID}>
                               {service.servisAdi} ({
