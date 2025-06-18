@@ -1,15 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import './index.css'; // Global CSS'iniz
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { BrowserRouter } from 'react-router-dom'; // BU SATIRI EKLEYİN
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter> {/* APP BİLEŞENİNİZİ BURADA SARIN */}
+      <App />
+    </BrowserRouter>
   </React.StrictMode>
 );
 
