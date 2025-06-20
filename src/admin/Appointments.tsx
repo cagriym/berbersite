@@ -32,7 +32,7 @@ const Appointments: React.FC = () => {
             if (Array.isArray(data)) {
                 setAppointments(data);
             } else {
-                console.error('Appointments API’den beklenen dizi formatı gelmedi:', data);
+                console.error('Appointments API`den beklenen dizi formatı gelmedi:', data);
                 setAppointments([]);
             }
         } catch (err: any) {

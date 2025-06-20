@@ -95,8 +95,8 @@ const Needs: React.FC = () => {
             setNeeds(Array.isArray(needsData) ? needsData : []);
             setCustomers(Array.isArray(customersData) ? customersData : []);
             
-            if (!Array.isArray(needsData)) console.error('Needs API’den beklenen dizi formatı gelmedi:', needsData);
-            if (!Array.isArray(customersData)) console.error('Customers API’den beklenen dizi formatı gelmedi:', customersData);
+            if (!Array.isArray(needsData)) console.error('Needs API`den beklenen dizi formatı gelmedi:', needsData);
+            if (!Array.isArray(customersData)) console.error('Customers API`den beklenen dizi formatı gelmedi:', customersData);
 
         } catch (err: any) {
             setError(err.message);

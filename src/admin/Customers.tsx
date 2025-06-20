@@ -70,7 +70,7 @@ const Customers: React.FC = () => {
             if (Array.isArray(response.data)) {
                 setCustomers(response.data);
             } else {
-                console.error('API'den beklenen dizi formatı gelmedi:', response.data);
+                console.error('API`den beklenen dizi formatı gelmedi:', response.data);
                 setCustomers([]);
             }
         } catch (error) {
