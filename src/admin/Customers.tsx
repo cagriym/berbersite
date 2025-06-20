@@ -1,156 +1,79 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
+// API'den gelen müşteri nesnesinin yapısını tanımla
 interface Customer {
-  musteriID: number;
-  ad: string;
-  soyad: string;
-  telefon: string;
-  sonGelisTarihi: string;
-}
-
-const API_BASE_URL = 'https://oktay-sac-tasarim1.azurewebsites.net/api';
-
-function getHeaders(contentType = false) {
-  const token = localStorage.getItem('admin_token');
-  const headers: Record<string, string> = {};
-  if (contentType) headers['Content-Type'] = 'application/json';
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  return headers;
+    musteriID: number;
+    adSoyad: string;
+    telefon: string;
+    createdAt: string;
 }
 
 const Customers: React.FC = () => {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [form, setForm] = useState<Partial<Customer>>({});
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [actionLoading, setActionLoading] = useState<number | null>(null);
-  const [search, setSearch] = useState('');
+    const [customers, setCustomers] = useState<Customer[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
-  // Fetch all customers
-  const fetchCustomers = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch(`${API_BASE_URL}/Musteriler`, { headers: getHeaders() });
-      if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
-      setCustomers(data);
-    } catch (err: any) {
-      setError(err.message || 'Müşteriler yüklenemedi.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    useEffect(() => {
+        const fetchCustomers = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await fetch(`${API_BASE_URL}/Musteriler`);
+                if (!response.ok) {
+                    throw new Error(`Veri çekme başarısız: ${response.status}`);
+                }
+                const data: Customer[] = await response.json();
+                setCustomers(data);
+            } catch (err: any) {
+                setError(err.message || 'Müşterileri çekerken bir hata oluştu.');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
+        fetchCustomers();
+    }, [API_BASE_URL]);
 
-  // Add or update customer
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setActionLoading(editingId ?? 0);
-    setError('');
-    try {
-      const method = editingId ? 'PUT' : 'POST';
-      const url = editingId ? `${API_BASE_URL}/Musteriler/${editingId}` : `${API_BASE_URL}/Musteriler`;
-      const res = await fetch(url, {
-        method,
-        headers: getHeaders(true),
-        body: JSON.stringify(form),
-      });
-      if (!res.ok) throw new Error(await res.text());
-      setForm({});
-      setEditingId(null);
-      await fetchCustomers();
-    } catch (err: any) {
-      setError(err.message || 'Müşteri kaydedilemedi.');
-    } finally {
-      setActionLoading(null);
-    }
-  };
+    return (
+        <div className="container-fluid mt-4">
+            <h2 className="mb-4">Tüm Müşteriler</h2>
 
-  // Edit customer
-  const handleEdit = (customer: Customer) => {
-    setForm(customer);
-    setEditingId(customer.musteriID);
-  };
+            {loading && (
+                <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
+                    <p>Yükleniyor...</p>
+                </div>
+            )}
 
-  // Delete customer
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('Bu müşteriyi silmek istediğinize emin misiniz?')) return;
-    setActionLoading(id);
-    setError('');
-    try {
-      const res = await fetch(`${API_BASE_URL}/Musteriler/${id}`, {
-        method: 'DELETE',
-        headers: getHeaders(),
-      });
-      if (!res.ok && res.status !== 204) throw new Error(await res.text());
-      setCustomers((prev) => prev.filter((c) => c.musteriID !== id));
-    } catch (err: any) {
-      setError(err.message || 'Müşteri silinemedi.');
-    } finally {
-      setActionLoading(null);
-    }
-  };
+            {error && <div className="alert alert-danger">Hata: {error}</div>}
 
-  const filteredCustomers = customers.filter(c =>
-    c.ad.toLowerCase().includes(search.toLowerCase()) ||
-    c.soyad.toLowerCase().includes(search.toLowerCase()) ||
-    c.telefon.includes(search)
-  );
-
-  return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Müşteriler</h2>
-      <div className="bg-white p-6 rounded shadow overflow-x-auto">
-        {error && <div className="text-red-600 mb-2">{error}</div>}
-        <div className="flex flex-wrap gap-2 mb-4 items-end">
-          <input type="text" placeholder="Ad, soyad veya telefon" className="border p-2 rounded" value={search} onChange={e => setSearch(e.target.value)} />
+            {!loading && !error && (
+                <div className="table-responsive">
+                    <table className="table table-striped table-hover">
+                        <thead className="thead-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Ad Soyad</th>
+                                <th>Telefon Numarası</th>
+                                <th>Kayıt Tarihi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {customers.map((customer, index) => (
+                                <tr key={customer.musteriID}>
+                                    <td>{index + 1}</td>
+                                    <td>{customer.adSoyad}</td>
+                                    <td>{customer.telefon}</td>
+                                    <td>{new Date(customer.createdAt).toLocaleDateString('tr-TR')}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
-        <form onSubmit={handleSubmit} className="mb-4 flex flex-wrap gap-2 items-end">
-          <input type="text" placeholder="Ad" className="border p-2 rounded" value={form.ad || ''} onChange={e => setForm(f => ({ ...f, ad: e.target.value }))} required />
-          <input type="text" placeholder="Soyad" className="border p-2 rounded" value={form.soyad || ''} onChange={e => setForm(f => ({ ...f, soyad: e.target.value }))} required />
-          <input type="text" placeholder="Telefon" className="border p-2 rounded" value={form.telefon || ''} onChange={e => setForm(f => ({ ...f, telefon: e.target.value }))} required />
-          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition" disabled={actionLoading !== null}>{editingId ? 'Güncelle' : 'Ekle'}</button>
-          {editingId && <button type="button" className="ml-2 px-4 py-2 rounded bg-gray-300 hover:bg-gray-400" onClick={() => { setForm({}); setEditingId(null); }}>Vazgeç</button>}
-        </form>
-        {loading ? (
-          <div>Yükleniyor...</div>
-        ) : filteredCustomers.length === 0 ? (
-          <div>Hiç müşteri bulunamadı.</div>
-        ) : (
-          <table className="min-w-full text-sm border">
-            <thead>
-              <tr className="bg-amber-100">
-                <th className="p-2 border">Ad</th>
-                <th className="p-2 border">Soyad</th>
-                <th className="p-2 border">Telefon</th>
-                <th className="p-2 border">Son Geliş</th>
-                <th className="p-2 border">İşlemler</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredCustomers.map((c) => (
-                <tr key={c.musteriID}>
-                  <td className="p-2 border">{c.ad}</td>
-                  <td className="p-2 border">{c.soyad}</td>
-                  <td className="p-2 border">{c.telefon}</td>
-                  <td className="p-2 border">{c.sonGelisTarihi ? c.sonGelisTarihi.slice(0, 10) : '-'}</td>
-                  <td className="p-2 border space-x-2">
-                    <button className="px-2 py-1 rounded text-xs font-bold bg-yellow-500 text-white hover:bg-yellow-600 transition" onClick={() => handleEdit(c)} disabled={actionLoading === c.musteriID}>Düzenle</button>
-                    <button className="px-2 py-1 rounded text-xs font-bold bg-red-500 text-white hover:bg-red-600 transition" onClick={() => handleDelete(c.musteriID)} disabled={actionLoading === c.musteriID}>{actionLoading === c.musteriID ? '...' : 'Sil'}</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Customers; 

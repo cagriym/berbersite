@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminLayout from './admin/AdminLayout';
+import Dashboard from './admin/Dashboard';
+import Appointments from './admin/Appointments';
+import Customers from './admin/Customers';
+import Needs from './admin/Needs';
 
 const Admin: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
@@ -16,7 +21,7 @@ const Admin: React.FC = () => {
         if (username === 'admin' && password === 'admin123') {
             sessionStorage.setItem('isLoggedIn', 'true');
             setIsLoggedIn(true);
-            window.location.reload(); 
+            // Sayfa yenileme yerine Navigate bileşeninin durumu yönetmesine izin ver
         } else {
             setError('Kullanıcı adı veya şifre yanlış.');
         }
@@ -58,7 +63,17 @@ const Admin: React.FC = () => {
         );
     }
 
-    return <AdminLayout />;
+    return (
+        <Routes>
+            <Route element={<AdminLayout />}>
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="appointments" element={<Appointments />} />
+                <Route path="customers" element={<Customers />} />
+                <Route path="needs" element={<Needs />} />
+            </Route>
+        </Routes>
+    );
 };
 
 export default Admin; 
