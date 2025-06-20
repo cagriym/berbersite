@@ -1,5 +1,27 @@
 {
+  "routes": [
+    {
+      "route": "/api/*",
+      "rewrite": "/api/*"
+    },
+    {
+      "route": "/admin/*",
+      "rewrite": "/index.html",
+      "allowedRoles": ["authenticated"]
+    },
+    {
+      "route": "/*",
+      "rewrite": "/index.html"
+    }
+  ],
+  "responseOverrides": {
+    "404": {
+      "rewrite": "/index.html",
+      "statusCode": 200
+    }
+  },
   "navigationFallback": {
-    "rewrite": "/index.html"
+    "rewrite": "/index.html",
+    "exclude": ["/static/media/*", "/static/css/*", "/static/js/*", "*.{png,jpg,gif,ico,svg}"]
   }
 } 
