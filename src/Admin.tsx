@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import AdminLayout from './admin/AdminLayout';
 import Dashboard from './admin/Dashboard';
 import Appointments from './admin/Appointments';
@@ -13,7 +13,7 @@ const AdminLogin = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,7 +35,7 @@ const AdminLogin = () => {
                 // Giriş başarılı olursa token'ı saklayın (localStorage veya sessionStorage)
                 localStorage.setItem('admin_token', data.token);
                 // Admin paneline yönlendirin
-                navigate('/admin/dashboard'); // veya /admin/randevular
+                // navigate('/admin/dashboard'); // veya /admin/randevular
             } else {
                 const errorData = await response.text();
                 setError(errorData || 'Giriş başarısız. Kullanıcı adı veya şifre yanlış.');
@@ -97,14 +97,8 @@ const AdminLogin = () => {
 
 const Admin = () => {
     const location = useLocation();
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const isLoggedIn = !!localStorage.getItem('admin_token');
-
-    // Logout function
-    const handleLogout = () => {
-        localStorage.removeItem('admin_token');
-        navigate('/admin/login');
-    };
 
     // If not logged in, redirect all /admin/* except /admin/login to login
     if (!isLoggedIn && location.pathname !== '/admin/login') {

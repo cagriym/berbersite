@@ -269,7 +269,7 @@ const MainLayout = () => {
         if (services.length > 0 && selectedServiceIds.length === 0) {
             setSelectedServiceIds([services[0].servisID]);
         }
-    }, [services]);
+    }, [services, selectedServiceIds.length]);
 
     useEffect(() => {
         // Toplam ücreti hesapla
