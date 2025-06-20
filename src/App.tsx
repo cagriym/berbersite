@@ -19,22 +19,6 @@ interface Service {
   varsayilanUcret: number | null | undefined;
 }
 
-// Randevu verilerini temsil eden arayüz (API'den gelen veriye göre camelCase)
-interface Appointment {
-  randevuID: number;
-  musteriID: number;
-  servisID: number;
-  musteriAdi: string;
-  musteriSoyad: string;
-  musteriTelefon: string;
-  randevuZamani: string; // ISO string formatında
-  servis: string; // API'den join ile gelen servis adı
-  ucret: number | null | undefined; // camelCase
-  aciklama: string;
-  tamamlandimi: boolean;
-  createdAt: string; // API'den gelen yaratılma tarihi
-}
-
 // İhtiyaç (Gider) verilerini temsil eden arayüz (API'den gelen veriye göre camelCase)
 interface Need {
   ihtiyacID: number;
