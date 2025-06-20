@@ -250,9 +250,6 @@ const MainLayout = () => {
             if (response.ok) {
                 const data: Service[] = await response.json();
                 setServices(data);
-                if (data.length > 0 && selectedServiceIds.length === 0) {
-                    setSelectedServiceIds([data[0].servisID]);
-                }
             } else {
                 throw new Error('Servisler yüklenemedi.');
             }
@@ -262,7 +259,7 @@ const MainLayout = () => {
         } finally {
             setLoading(false);
         }
-    }, [selectedServiceIds]);
+    }, []);
 
     useEffect(() => {
         fetchServices();

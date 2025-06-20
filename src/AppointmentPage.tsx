@@ -86,25 +86,36 @@ const AppointmentPage: React.FC<AppointmentPageProps> = ({
             ) : services.length === 0 ? (
               <p className="text-red-500 text-xs">Servisler şu anda hizmet vermiyor.</p>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {services.map((service: any) => (
-                  <label key={service.servisID} className="flex items-center gap-2 text-sm font-medium bg-amber-50 px-2 py-1 rounded shadow-sm border border-amber-200 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedServiceIds.includes(service.servisID)}
-                      onChange={e => {
-                        if (e.target.checked) {
-                          setSelectedServiceIds([...selectedServiceIds, service.servisID]);
-                        } else {
-                          setSelectedServiceIds(selectedServiceIds.filter(id => id !== service.servisID));
-                        }
-                      }}
-                      className="accent-amber-600"
-                    />
-                    {service.servisAdi} ({typeof service.varsayilanUcret === 'number' && !isNaN(service.varsayilanUcret) ? service.varsayilanUcret.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : 'Ücret Bilinmiyor'})
-                  </label>
-                ))}
-              </div>
+              <>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {services.map((service: any) => (
+                    <label key={service.servisID} className="flex items-center gap-2 text-sm font-medium bg-amber-50 px-2 py-1 rounded shadow-sm border border-amber-200 cursor-pointer hover:bg-amber-100 transition">
+                      <input
+                        type="checkbox"
+                        checked={selectedServiceIds.includes(service.servisID)}
+                        onChange={e => {
+                          if (e.target.checked) {
+                            setSelectedServiceIds([...selectedServiceIds, service.servisID]);
+                          } else {
+                            setSelectedServiceIds(selectedServiceIds.filter(id => id !== service.servisID));
+                          }
+                        }}
+                        className="accent-amber-600"
+                      />
+                      {service.servisAdi} ({typeof service.varsayilanUcret === 'number' && !isNaN(service.varsayilanUcret) ? service.varsayilanUcret.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : 'Ücret Bilinmiyor'})
+                    </label>
+                  ))}
+                </div>
+                {selectedServiceIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedServiceIds([])}
+                    className="text-xs text-red-600 hover:text-red-800 font-medium underline transition"
+                  >
+                    Seçili Servisleri Temizle
+                  </button>
+                )}
+              </>
             )}
           </div>
           <div className="col-span-1 md:col-span-2 text-right text-base font-bold text-amber-700">
