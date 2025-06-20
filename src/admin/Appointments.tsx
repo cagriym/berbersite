@@ -10,13 +10,15 @@ interface Appointment {
         adSoyad: string;
         telefon: string;
     };
+    randevuTarihi: string;
+    randevuSaati: string;
     randevuZamani: string;
     randevuServisler: { 
-        servis: {
-            servisAdi: string; 
-            varsayilanUcret: number | null; 
-        }
+        servisID: number;
+        servisAdi: string; 
+        varsayilanUcret: number | null; 
     }[];
+    servisAdlari: string;
     aciklama: string | null;
     ucret: number;
     tamamlandimi: boolean;
@@ -200,7 +202,7 @@ const Appointments: React.FC = () => {
                                     {app.tamamlandimi ? 'Tamamlandı' : 'Bekliyor'}
                                 </span>
                             </div>
-                            <p className="text-sm text-gray-600">{formatDate(app.randevuZamani)}</p>
+                            <p className="text-sm text-gray-600">{app.randevuTarihi} {app.randevuSaati}</p>
                             <p className="text-sm text-gray-500">{app.musteri?.telefon}</p>
                         </div>
                     ))}
@@ -229,19 +231,12 @@ const Appointments: React.FC = () => {
 
                                     <div className="mt-4">
                                         <p className="text-sm font-semibold text-gray-600">Randevu Tarihi:</p>
-                                        <p className="text-gray-800">{formatDate(app.randevuZamani)}</p>
+                                        <p className="text-gray-800">{app.randevuTarihi} {app.randevuSaati}</p>
                                     </div>
                                     
                                     <div className="mt-4">
                                         <p className="text-sm font-semibold text-gray-600">İstenen Servisler:</p>
-                                        <ul className="list-disc list-inside text-gray-700">
-                                            {Array.isArray(app.randevuServisler) && app.randevuServisler.map((rs, index) => (
-                                                <li key={index}>
-                                                    {rs.servis?.servisAdi || 'Bilinmeyen Servis'} 
-                                                    ({rs.servis?.varsayilanUcret?.toLocaleString('tr-TR') || 0} TL)
-                                                </li>
-                                            ))}
-                                        </ul>
+                                        <p className="text-gray-700">{app.servisAdlari || 'Servis bilgisi yok'}</p>
                                     </div>
 
                                     {app.aciklama && <div className="mt-4 p-3 bg-gray-50 rounded-md">

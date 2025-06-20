@@ -88,23 +88,28 @@ const Dashboard: React.FC = () => {
             const totalCustomers = customers.length;
             const totalNeeds = needs.length;
 
-            // Gelir hesaplama (randevular)
-            const totalRevenue = appointments.reduce((sum: number, app: any) => {
-                return sum + (app.ucret || 0);
-            }, 0);
+            // Gelir hesaplama (sadece tamamlanmış randevular)
+            const totalRevenue = appointments
+                .filter((app: any) => app.tamamlandimi)
+                .reduce((sum: number, app: any) => {
+                    return sum + (app.ucret || 0);
+                }, 0);
 
-            // Aylık gelir (bu ay)
+            // Aylık gelir (bu ay, sadece tamamlanmış randevular)
             const currentMonth = new Date().getMonth();
             const currentYear = new Date().getFullYear();
             const monthlyRevenue = appointments
                 .filter((app: any) => {
                     const appDate = new Date(app.randevuZamani);
-                    return appDate.getMonth() === currentMonth && appDate.getFullYear() === currentYear;
+                    return appDate.getMonth() === currentMonth && 
+                           appDate.getFullYear() === currentYear && 
+                           app.tamamlandimi;
                 })
                 .reduce((sum: number, app: any) => sum + (app.ucret || 0), 0);
 
-            // Ortalama randevu değeri
-            const avgAppointmentValue = totalAppointments > 0 ? totalRevenue / totalAppointments : 0;
+            // Ortalama randevu değeri (sadece tamamlanmış randevular)
+            const completedAppointments = appointments.filter((app: any) => app.tamamlandimi);
+            const avgAppointmentValue = completedAppointments.length > 0 ? totalRevenue / completedAppointments.length : 0;
 
             setStats({
                 totalAppointments,
