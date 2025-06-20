@@ -11,3 +11,66 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Animasyonlar */
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 1.2s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes gradient-move {
+  0%,100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-move 12s ease-in-out infinite;
+}
+
+/* Section geçiş animasyonu */
+@keyframes fade-in-section {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-section {
+  animation: fade-in-section 0.9s cubic-bezier(0.4,0,0.2,1) both;
+}
+
+/* Section spacing optimizasyonu */
+section, .section, .min-h-screen, .min-h-\[60vh\] {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+  min-height: 30vh !important;
+}
+
+.pt-24, .pb-12, .pt-28, .pb-16 {
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+}
+
+@media (min-width: 768px) {
+  section, .section, .min-h-screen, .min-h-\[60vh\] {
+    padding-top: 2.5rem !important;
+    padding-bottom: 2.5rem !important;
+    min-height: 40vh !important;
+  }
+}
+
+.bg-white\/80 {
+  background-color: rgba(255,255,255,0.80) !important;
+}
+
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px) !important;
+}
+
+/* Galeriye özel stil kaldırıldı */
