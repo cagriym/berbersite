@@ -1,20 +1,18 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import MainLayout from './MainLayout';
 import Admin from './Admin';
 import './App.css';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Admin paneli için yol. /admin veya /admin/login gibi tüm alt yolları yakalar. */}
-        <Route path="/admin/*" element={<Admin />} />
+    <Routes>
+      {/* Admin paneli için yol. /admin veya /admin/login gibi tüm alt yolları yakalar. */}
+      <Route path="/admin/*" element={<Admin />} />
 
-        {/* Ana tanıtım sitesi için yol. Diğer tüm yolları yakalar. */}
-        <Route path="/*" element={<MainLayout />} />
-      </Routes>
-    </BrowserRouter>
+      {/* Ana tanıtım sitesi için yol. Diğer tüm yolları yakalar. */}
+      <Route path="/*" element={<MainLayout />} />
+    </Routes>
   );
 }
 
