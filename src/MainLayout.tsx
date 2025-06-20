@@ -18,13 +18,6 @@ interface Service {
   varsayilanUcret: number | null | undefined;
 }
 
-const sliderImages = [
-    '/oktayberber3.png',
-    '/oktayberber2.png',
-    '/oktayberber1.png',
-    '/oktayberber4.png',
-];
-
 function StilGalerisiSlider() {
     const settings = {
         dots: true,
