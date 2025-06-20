@@ -32,16 +32,7 @@ const About = () => {
                 <div className="w-full max-w-md mx-auto">
                     <Slider {...settings}>
                         <div>
-                            <img src="/oktayberber1.png" alt="Oktay Berber 1" className="rounded-lg shadow-lg w-full h-96 object-cover" />
-                        </div>
-                        <div>
-                            <img src="/oktayberber2.png" alt="Oktay Berber 2" className="rounded-lg shadow-lg w-full h-96 object-cover" />
-                        </div>
-                        <div>
-                            <img src="/oktayberber3.png" alt="Oktay Berber 3" className="rounded-lg shadow-lg w-full h-96 object-cover" />
-                        </div>
-                        <div>
-                            <img src="/oktayberber4.png" alt="Oktay Berber 4" className="rounded-lg shadow-lg w-full h-96 object-cover" />
+                            <img src="/oktayberber5.png" alt="Oktay Berber 5" className="rounded-lg shadow-lg w-full h-96 object-cover" />
                         </div>
                     </Slider>
                 </div>

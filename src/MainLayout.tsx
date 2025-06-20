@@ -6,6 +6,9 @@ import About from './About';
 import Services from './Services';
 import Contact from './Contact';
 import AppointmentPage from './AppointmentPage';
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 const API_BASE_URL = 'https://oktay-sac-tasarim1.azurewebsites.net/api';
 
@@ -22,36 +25,36 @@ const sliderImages = [
     '/oktayberber4.png',
 ];
 
-function PhotoSlider() {
-    const [index, setIndex] = useState(0);
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-    useEffect(() => {
-        timeoutRef.current = setTimeout(() => {
-            setIndex((prev) => (prev + 1) % sliderImages.length);
-        }, 5000);
-        return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
-    }, [index]);
-
-    const prev = () => setIndex((prev) => (prev - 1 + sliderImages.length) % sliderImages.length);
-    const next = () => setIndex((prev) => (prev + 1) % sliderImages.length);
+function StilGalerisiSlider() {
+    const settings = {
+        dots: true,
+        infinite: true,
+        speed: 500,
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        autoplay: true,
+        autoplaySpeed: 3000,
+        arrows: true,
+        adaptiveHeight: true,
+        className: 'photo-slider'
+    };
 
     return (
-        <div className="relative w-full flex justify-center items-center min-h-[260px] md:min-h-[400px] lg:min-h-[500px] py-4">
-            <div className="absolute inset-0 flex items-center justify-center">
-                {sliderImages.map((src, i) => (
-                    <img
-                        key={src}
-                        src={src}
-                        alt="Oktay Berber Slider"
-                        className={`transition-opacity duration-700 absolute w-full h-full object-contain rounded-2xl shadow-xl ${i === index ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-                        style={{ maxHeight: '500px', minHeight: '260px' }}
-                    />
-                ))}
-                <div className="absolute inset-0 bg-white/40 backdrop-blur-sm rounded-2xl" />
-            </div>
-            <button onClick={prev} className="z-20 absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white/90 rounded-full p-2 shadow-md"><i className="fas fa-chevron-left text-2xl text-amber-700"></i></button>
-            <button onClick={next} className="z-20 absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white/90 rounded-full p-2 shadow-md"><i className="fas fa-chevron-right text-2xl text-amber-700"></i></button>
+        <div className="w-full max-w-md mx-auto">
+            <Slider {...settings}>
+                <div>
+                    <img src="/oktayberber1.png" alt="Oktay Berber 1" className="rounded-lg shadow-lg w-full h-96 object-cover" />
+                </div>
+                <div>
+                    <img src="/oktayberber2.png" alt="Oktay Berber 2" className="rounded-lg shadow-lg w-full h-96 object-cover" />
+                </div>
+                <div>
+                    <img src="/oktayberber3.png" alt="Oktay Berber 3" className="rounded-lg shadow-lg w-full h-96 object-cover" />
+                </div>
+                <div>
+                    <img src="/oktayberber4.png" alt="Oktay Berber 4" className="rounded-lg shadow-lg w-full h-96 object-cover" />
+                </div>
+            </Slider>
         </div>
     );
 }
@@ -329,7 +332,9 @@ const MainLayout = () => {
                 <section ref={aboutRef} id="about"><About /></section>
                 <div className="container mx-auto px-4 py-12">
                     <h2 className="text-4xl font-bold text-center text-amber-800 mb-12">Stil Galerimiz</h2>
-                    <PhotoSlider />
+                    <div className="flex justify-center">
+                        <StilGalerisiSlider />
+                    </div>
                 </div>
                 <section ref={servicesRef} id="services"><Services services={services} /></section>
                 {showAppointment && (
