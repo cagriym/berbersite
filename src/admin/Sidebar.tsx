@@ -1,8 +1,7 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 const Sidebar: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
-    const navigate = useNavigate();
 
     return (
         <div className="w-64 bg-white shadow-md flex flex-col">
