@@ -67,7 +67,12 @@ const Customers: React.FC = () => {
         setLoading(true);
         try {
             const response = await axios.get(`${API_BASE_URL}/api/Musteriler`);
-            setCustomers(response.data);
+            if (Array.isArray(response.data)) {
+                setCustomers(response.data);
+            } else {
+                console.error('API'den beklenen dizi formatı gelmedi:', response.data);
+                setCustomers([]);
+            }
         } catch (error) {
             console.error('Müşteriler alınırken hata oluştu:', error);
             setError('Müşteri verileri alınamadı.');
@@ -139,7 +144,7 @@ const Customers: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {customers.map(c => (
+                        {Array.isArray(customers) && customers.map(c => (
                             <tr key={c.musteriID} className="border-b border-gray-200 hover:bg-gray-50">
                                 <td className="px-5 py-5 text-sm">
                                     <p className="text-gray-900 whitespace-no-wrap">{c.adSoyad}</p>

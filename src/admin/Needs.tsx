@@ -79,18 +79,29 @@ const Needs: React.FC = () => {
 
     const fetchData = useCallback(async () => {
         setLoading(true);
+        setError(null);
         try {
             const [needsRes, customersRes] = await Promise.all([
                 fetch(`${API_BASE_URL}/api/Needs`),
                 fetch(`${API_BASE_URL}/api/Musteriler`)
             ]);
-            if (!needsRes.ok || !customersRes.ok) throw new Error('Veriler çekilemedi.');
+
+            if (!needsRes.ok) throw new Error('İhtiyaç verileri çekilemedi.');
+            if (!customersRes.ok) throw new Error('Müşteri verileri çekilemedi.');
+
             const needsData = await needsRes.json();
             const customersData = await customersRes.json();
-            setNeeds(needsData);
-            setCustomers(customersData);
+
+            setNeeds(Array.isArray(needsData) ? needsData : []);
+            setCustomers(Array.isArray(customersData) ? customersData : []);
+            
+            if (!Array.isArray(needsData)) console.error('Needs API’den beklenen dizi formatı gelmedi:', needsData);
+            if (!Array.isArray(customersData)) console.error('Customers API’den beklenen dizi formatı gelmedi:', customersData);
+
         } catch (err: any) {
             setError(err.message);
+            setNeeds([]); // Hata durumunda boşalt
+            setCustomers([]); // Hata durumunda boşalt
         } finally {
             setLoading(false);
         }
@@ -160,10 +171,10 @@ const Needs: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {needs.map(n => (
+                        {Array.isArray(needs) && needs.map(n => (
                             <tr key={n.ihtiyacID} className="border-b border-gray-200 hover:bg-gray-50">
                                 <td className="px-5 py-5 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap">{n.musteri.adSoyad}</p>
+                                    <p className="text-gray-900 whitespace-no-wrap">{n.musteri?.adSoyad || 'Bilinmeyen Müşteri'}</p>
                                 </td>
                                 <td className="px-5 py-5 text-sm">
                                     <p className="text-gray-900 whitespace-no-wrap">{n.ihtiyacTuru}</p>

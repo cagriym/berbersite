@@ -24,12 +24,20 @@ const Appointments: React.FC = () => {
     const fetchAppointments = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await fetch(`${API_BASE_URL}/Appointments`);
+            setError(null);
+            const response = await fetch(`${API_BASE_URL}/api/Appointments`);
             if (!response.ok) throw new Error('Randevu verileri çekilemedi.');
             const data = await response.json();
-            setAppointments(data);
+            
+            if (Array.isArray(data)) {
+                setAppointments(data);
+            } else {
+                console.error('Appointments API’den beklenen dizi formatı gelmedi:', data);
+                setAppointments([]);
+            }
         } catch (err: any) {
             setError(err.message);
+            setAppointments([]); // Hata durumunda boşalt
         } finally {
             setLoading(false);
         }
@@ -82,13 +90,13 @@ const Appointments: React.FC = () => {
         <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-6">Randevu Yönetimi</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {appointments.map((app) => (
+                {Array.isArray(appointments) && appointments.map((app) => (
                     <div key={app.randevuID} className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ${app.tamamlandimi ? 'opacity-60' : ''}`}>
                         <div className="p-5">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="font-bold text-lg text-gray-800">{app.musteri.adSoyad}</p>
-                                    <p className="text-sm text-gray-500">{app.musteri.telefon}</p>
+                                    <p className="font-bold text-lg text-gray-800">{app.musteri?.adSoyad || 'Bilinmeyen'}</p>
+                                    <p className="text-sm text-gray-500">{app.musteri?.telefon}</p>
                                 </div>
                                 <span className={`px-3 py-1 text-xs font-semibold rounded-full ${app.tamamlandimi ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                                     {app.tamamlandimi ? 'Tamamlandı' : 'Bekliyor'}
@@ -103,7 +111,7 @@ const Appointments: React.FC = () => {
                             <div className="mt-4">
                                 <p className="text-sm font-semibold text-gray-600">İstenen Servisler:</p>
                                 <ul className="list-disc list-inside text-gray-700">
-                                    {app.randevuServisler.map(s => <li key={s.servisAdi}>{s.servisAdi} ({s.varsayilanUcret?.toLocaleString('tr-TR')} TL)</li>)}
+                                    {Array.isArray(app.randevuServisler) && app.randevuServisler.map(s => <li key={s.servisAdi}>{s.servisAdi} ({s.varsayilanUcret?.toLocaleString('tr-TR')} TL)</li>)}
                                 </ul>
                             </div>
 
