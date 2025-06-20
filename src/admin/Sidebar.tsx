@@ -1,7 +1,10 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { FaTachometerAlt, FaUsers, FaCalendarCheck, FaBoxOpen, FaUserCog } from 'react-icons/fa';
+import { useLocation } from 'react-router-dom';
 
 const Sidebar: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
+    const location = useLocation();
 
     return (
         <div className="w-64 bg-white shadow-md flex flex-col">
@@ -21,6 +24,9 @@ const Sidebar: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
                 </NavLink>
                 <NavLink to="/admin/needs" className={({ isActive }) => `flex items-center px-4 py-2 mt-2 text-gray-600 rounded-md hover:bg-amber-100 hover:text-amber-700 ${isActive ? 'bg-amber-200 text-amber-800' : ''}`}>
                     <i className="fas fa-box-open mr-3"></i> İhtiyaçlar
+                </NavLink>
+                <NavLink to="/admin/personnel" className={({ isActive }) => `flex items-center px-4 py-2 mt-2 text-gray-600 rounded-md hover:bg-amber-100 hover:text-amber-700 ${isActive ? 'bg-amber-200 text-amber-800' : ''}`}>
+                    <i className="fas fa-user-cog mr-3"></i> Personel Yönetimi
                 </NavLink>
             </nav>
             <div className="p-4 border-t">

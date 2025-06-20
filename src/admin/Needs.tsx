@@ -5,9 +5,9 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://oktay-sac-ta
 // Basitleştirilmiş ihtiyaç yapısı
 interface Need {
     ihtiyacID: number;
-    ihtiyacTuru: string;
-    aciklama: string;
+    ad: string;
     fiyat: number;
+    aciklama: string | null;
     createdAt: string;
 }
 
@@ -38,21 +38,46 @@ const NeedModal = ({ need, onClose, onSave, loading }: { need: Partial<Need> | n
             <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">{formData.ihtiyacID ? 'İhtiyacı Düzenle' : 'Yeni İhtiyaç Ekle'}</h2>
                 <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="ihtiyacTuru">İhtiyaç Türü</label>
-                        <input type="text" id="ihtiyacTuru" name="ihtiyacTuru" value={formData.ihtiyacTuru || ''} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" required />
+                    <div className="space-y-4">
+                        <div>
+                            <label htmlFor="ad" className="block text-sm font-medium text-gray-700">İsim</label>
+                            <input
+                                type="text"
+                                name="ad"
+                                id="ad"
+                                value={formData.ad || ''}
+                                onChange={handleChange}
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="fiyat" className="block text-sm font-medium text-gray-700">Fiyat</label>
+                            <input
+                                type="number"
+                                name="fiyat"
+                                id="fiyat"
+                                value={formData.fiyat || 0}
+                                onChange={handleChange}
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="aciklama" className="block text-sm font-medium text-gray-700">Açıklama</label>
+                            <textarea
+                                name="aciklama"
+                                id="aciklama"
+                                rows={3}
+                                value={formData.aciklama || ''}
+                                onChange={handleChange}
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            />
+                        </div>
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="fiyat">Fiyat (TL)</label>
-                        <input type="number" step="0.01" id="fiyat" name="fiyat" value={formData.fiyat || ''} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" required />
-                    </div>
-                    <div className="mb-6">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="aciklama">Açıklama</label>
-                        <textarea id="aciklama" name="aciklama" value={formData.aciklama || ''} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" rows={3} />
-                    </div>
-                    <div className="flex justify-end gap-4">
-                        <button type="button" onClick={onClose} className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">İptal</button>
-                        <button type="submit" disabled={loading} className="px-4 py-2 text-white bg-amber-600 rounded-lg hover:bg-amber-700 disabled:bg-gray-400">
+                    <div className="mt-6 flex justify-end space-x-3">
+                        <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">İptal</button>
+                        <button type="submit" disabled={loading} className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400">
                             {loading ? 'Kaydediliyor...' : 'Kaydet'}
                         </button>
                     </div>
@@ -75,17 +100,16 @@ const Needs: React.FC = () => {
         setError(null);
         try {
             const response = await fetch(`${API_BASE_URL}/api/Needs`);
-            if (!response.ok) throw new Error('İhtiyaç verileri çekilemedi.');
-
-            const needsData = await response.json();
-            console.log('Needs API Response:', needsData);
-
-            setNeeds(Array.isArray(needsData) ? needsData : []);
-            
-            if (!Array.isArray(needsData)) console.error('Needs API`den beklenen dizi formatı gelmedi:', needsData);
-
-        } catch (err: any) {
-            setError(err.message);
+            if (!response.ok) throw new Error('İhtiyaçlar yüklenemedi');
+            const data = await response.json();
+            if (Array.isArray(data)) {
+                setNeeds(data);
+            } else {
+                console.error("API'den beklenen dizi formatı gelmedi:", data);
+                setNeeds([]); // Hata durumunda boş dizi ata
+            }
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Bilinmeyen bir hata oluştu');
             setNeeds([]);
         } finally {
             setLoading(false);
@@ -96,25 +120,33 @@ const Needs: React.FC = () => {
         fetchNeeds();
     }, [fetchNeeds]);
 
-    const handleSave = async (need: Partial<Need>) => {
-        setActionLoading(true);
-        const method = need.ihtiyacID ? 'PUT' : 'POST';
-        const url = need.ihtiyacID ? `${API_BASE_URL}/api/Needs/${need.ihtiyacID}` : `${API_BASE_URL}/api/Needs`;
+    const handleSave = async () => {
+        if (!selectedNeed) return;
+
+        const url = selectedNeed.ihtiyacID
+            ? `${API_BASE_URL}/api/Needs/${selectedNeed.ihtiyacID}`
+            : `${API_BASE_URL}/api/Needs`;
+
+        const method = selectedNeed.ihtiyacID ? 'PUT' : 'POST';
+
+        const needData = {
+            ihtiyacTuru: selectedNeed.ad,
+            fiyat: selectedNeed.fiyat,
+            aciklama: selectedNeed.aciklama,
+        };
 
         try {
             const response = await fetch(url, {
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(need)
+                body: JSON.stringify(needData)
             });
-            if (!response.ok) throw new Error('İhtiyaç kaydedilemedi.');
+            if (!response.ok) throw new Error('İhtiyaç kaydedilemedi');
             setIsModalOpen(false);
             setSelectedNeed(null);
             await fetchNeeds();
         } catch (err: any) {
             setError(err.message);
-        } finally {
-            setActionLoading(false);
         }
     };
 
@@ -148,42 +180,30 @@ const Needs: React.FC = () => {
                 <table className="min-w-full leading-normal">
                     <thead>
                         <tr className="border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            <th className="px-5 py-3">İhtiyaç Türü</th>
-                            <th className="px-5 py-3">Fiyat</th>
-                            <th className="px-5 py-3">Açıklama</th>
-                            <th className="px-5 py-3">Eklenme Tarihi</th>
-                            <th className="px-5 py-3 text-right">İşlemler</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İsim</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fiyat</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Açıklama</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Oluşturma Tarihi</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {Array.isArray(needs) && needs.length > 0 ? (
-                            needs.map(n => (
-                                <tr key={n.ihtiyacID} className="border-b border-gray-200 hover:bg-gray-50">
-                                    <td className="px-5 py-5 text-sm">
-                                        <p className="text-gray-900 whitespace-no-wrap font-medium">{n.ihtiyacTuru}</p>
-                                    </td>
-                                    <td className="px-5 py-5 text-sm">
-                                        <p className="text-gray-900 whitespace-no-wrap font-bold">{n.fiyat?.toLocaleString('tr-TR')} TL</p>
-                                    </td>
-                                    <td className="px-5 py-5 text-sm">
-                                        <p className="text-gray-900">{n.aciklama || '-'}</p>
-                                    </td>
-                                    <td className="px-5 py-5 text-sm">
-                                        <p className="text-gray-900 whitespace-no-wrap">{new Date(n.createdAt).toLocaleDateString('tr-TR')}</p>
-                                    </td>
-                                    <td className="px-5 py-5 text-sm text-right">
-                                        <button onClick={() => { setSelectedNeed(n); setIsModalOpen(true); }} className="text-amber-600 hover:text-amber-900 mr-4">Düzenle</button>
-                                        <button onClick={() => handleDelete(n.ihtiyacID)} className="text-red-600 hover:text-red-900">Sil</button>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={5} className="px-5 py-5 text-center text-gray-500">
-                                    Henüz ihtiyaç kaydı bulunmuyor.
+                    <tbody className="bg-white divide-y divide-gray-200">
+                        {needs.map((need) => (
+                            <tr key={need.ihtiyacID}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{need.ad}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {need.fiyat ? `${need.fiyat.toFixed(2)} TL` : 'Belirtilmemiş'}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{need.aciklama || '-'}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {new Date(need.createdAt).toLocaleDateString()}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button onClick={() => { setSelectedNeed(need); setIsModalOpen(true); }} className="text-indigo-600 hover:text-indigo-900 mr-4">Düzenle</button>
+                                    <button onClick={() => handleDelete(need.ihtiyacID)} className="text-red-600 hover:text-red-900">Sil</button>
                                 </td>
                             </tr>
-                        )}
+                        ))}
                     </tbody>
                 </table>
             </div>

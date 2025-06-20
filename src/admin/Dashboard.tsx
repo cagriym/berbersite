@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://oktay-sac-tasarim1.azurewebsites.net';
 
@@ -36,6 +37,7 @@ const Dashboard: React.FC = () => {
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -191,13 +193,22 @@ const Dashboard: React.FC = () => {
                     <div className="p-6 bg-gray-50 rounded-lg">
                         <h3 className="text-lg font-semibold text-gray-700 mb-4">Hızlı İşlemler</h3>
                         <div className="space-y-3">
-                            <button className="w-full px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors">
+                            <button 
+                                onClick={() => navigate('/admin/needs')}
+                                className="w-full px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+                            >
                                 <i className="fas fa-plus mr-2"></i>Yeni İhtiyaç Ekle
                             </button>
-                            <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            <button 
+                                onClick={() => navigate('/admin/appointments')}
+                                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            >
                                 <i className="fas fa-calendar-plus mr-2"></i>Yeni Randevu
                             </button>
-                            <button className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            <button 
+                                onClick={() => navigate('/admin/customers')}
+                                className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                            >
                                 <i className="fas fa-user-plus mr-2"></i>Yeni Müşteri
                             </button>
                         </div>
