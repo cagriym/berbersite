@@ -7,10 +7,10 @@ import './App.css';
 function App() {
   return (
     <Routes>
-      {/* Admin paneli için yol. /admin veya /admin/login gibi tüm alt yolları yakalar. */}
+      {/* Admin paneli için yol. /admin altındaki tüm yolları yakalar. */}
       <Route path="/admin/*" element={<Admin />} />
 
-      {/* Ana tanıtım sitesi için yol. Diğer tüm yolları yakalar. */}
+      {/* Ana Tanıtım Sitesi */}
       <Route path="/*" element={<MainLayout />} />
     </Routes>
   );

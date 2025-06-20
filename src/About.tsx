@@ -1,14 +1,53 @@
 import React from 'react';
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
-const About = () => (
-  <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-orange-50 to-amber-100 pt-24 pb-12">
-    <div className="max-w-2xl w-full bg-white/80 rounded-xl shadow-xl p-8 text-center">
-      <h2 className="text-3xl font-extrabold text-amber-900 mb-4">Hakkımızda</h2>
-      <p className="text-lg text-amber-800 mb-4">Oktay Gün Saç Tasarım, yılların tecrübesiyle Samsun Atakum'da hizmet vermektedir. Modern ve yenilikçi yaklaşımımızla, müşterilerimize en iyi saç ve sakal tasarımını sunmayı amaçlıyoruz.</p>
-      <p className="text-base text-amber-700 mb-2">Müşteri memnuniyeti, hijyen ve kalite en büyük önceliğimizdir. Her müşterimize özel ilgi gösteriyor, onların tarzına ve isteklerine uygun çözümler sunuyoruz.</p>
-      <p className="text-base text-amber-700">Vizyonumuz; sektörde öncü, yenilikçi ve güvenilir bir marka olmak. Sizleri de salonumuzda ağırlamaktan mutluluk duyarız!</p>
-    </div>
-  </div>
-);
+const About = () => {
+    const settings = {
+        dots: true,
+        infinite: true,
+        speed: 500,
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        autoplay: true,
+        autoplaySpeed: 3000,
+        arrows: true,
+        adaptiveHeight: true,
+        className: 'photo-slider'
+    };
+
+    return (
+        <div id="about-section" className="py-20 px-4 sm:px-8 bg-white">
+            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div className="text-gray-700">
+                    <h2 className="text-4xl font-bold text-amber-900 mb-4">Hakkımızda</h2>
+                    <p className="mb-4">
+                        Oktay Saç Tasarım olarak, yılların verdiği tecrübe ve sanatsal bakış açımızla sizlere en iyi hizmeti sunmaktan gurur duyuyoruz. Misyonumuz, her müşterimizin kendini özel ve yenilenmiş hissetmesini sağlamaktır. Salonumuzda kullandığımız yüksek kaliteli ürünler ve modern tekniklerle, tarzınıza en uygun saç kesimini, renklendirmeyi ve bakımı sunuyoruz.
+                    </p>
+                    <p>
+                        Sıcak ve samimi bir ortamda, profesyonel ekibimizle tanışmak ve size özel hizmetlerimizden yararlanmak için randevunuzu bugün alın.
+                    </p>
+                </div>
+                <div className="w-full max-w-md mx-auto">
+                    <Slider {...settings}>
+                        <div>
+                            <img src="/oktayberber1.png" alt="Oktay Berber 1" className="rounded-lg shadow-lg w-full h-96 object-cover" />
+                        </div>
+                        <div>
+                            <img src="/oktayberber2.png" alt="Oktay Berber 2" className="rounded-lg shadow-lg w-full h-96 object-cover" />
+                        </div>
+                        <div>
+                            <img src="/oktayberber3.png" alt="Oktay Berber 3" className="rounded-lg shadow-lg w-full h-96 object-cover" />
+                        </div>
+                        <div>
+                            <img src="/oktayberber4.png" alt="Oktay Berber 4" className="rounded-lg shadow-lg w-full h-96 object-cover" />
+                        </div>
+                    </Slider>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export default About; 

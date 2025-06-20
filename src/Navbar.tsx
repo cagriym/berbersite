@@ -15,7 +15,6 @@ const Navbar = ({ activeSection, scrollToSection, setShowAppointment }: {
         <button className={activeSection==='home' ? 'text-amber-600 underline' : ''} onClick={() => scrollToSection('home')}>Ana Sayfa</button>
         <button className={activeSection==='about' ? 'text-amber-600 underline' : ''} onClick={() => scrollToSection('about')}>Hakkımızda</button>
         <button className={activeSection==='services' ? 'text-amber-600 underline' : ''} onClick={() => scrollToSection('services')}>Hizmetler</button>
-        {/* <button className={activeSection==='gallery' ? 'text-amber-600 underline' : ''} onClick={() => scrollToSection('gallery')}>Galeri</button> */}
         <button className={activeSection==='contact' ? 'text-amber-600 underline' : ''} onClick={() => scrollToSection('contact')}>İletişim</button>
         <button className="bg-amber-600 text-white px-3 py-1 rounded shadow" onClick={() => setShowAppointment(true)}>Randevu Al</button>
       </div>

@@ -17,7 +17,6 @@ const Home = ({ scrollToSection, setShowAppointment }: {
       </div>
       <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 animate-fade-in">
         <button onClick={() => scrollToSection('services')} className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg text-lg transition">Hizmetlerimiz</button>
-        <button onClick={() => scrollToSection('gallery')} className="bg-white border border-amber-400 text-amber-700 font-bold py-3 px-6 rounded-lg shadow-lg text-lg transition hover:bg-amber-50">Galeri</button>
         <button onClick={() => setShowAppointment(true)} className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg text-lg transition">Randevu Al</button>
       </div>
       <div className="mt-8 text-amber-900 text-base animate-fade-in">
