@@ -228,7 +228,19 @@ const MainLayout = () => {
             body: JSON.stringify(randevuData)
           });
           if (response.ok) {
-            setMessage('Randevunuz başarıyla oluşturuldu! Sizinle en kısa sürede iletişime geçeceğiz.');
+            // Tarih ve saati Türkçe formatında formatla
+            const formattedDate = appointmentDateTime.toLocaleDateString('tr-TR', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            });
+            const formattedTime = appointmentDateTime.toLocaleTimeString('tr-TR', {
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            
+            setMessage(`Randevunuz başarıyla oluşturuldu! ${formattedDate} tarihinde saat ${formattedTime}'de randevunuz var. Sizinle en kısa sürede iletişime geçeceğiz.`);
             setMessageType('success');
             clearForm();
             setShowAppointment(false);
