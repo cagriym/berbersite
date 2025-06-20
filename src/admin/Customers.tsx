@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
-// const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://oktay-sac-tasarim1.azurewebsites.net';
 
-// API'den gelen müşteri nesnesinin yapısını tanımla
+// API'den gelen müşteri nesnesinin yapısını tanımla (Swagger.json'a göre)
 interface Customer {
     musteriID: number;
     adSoyad: string;
@@ -65,8 +65,11 @@ const Customers: React.FC = () => {
 
     const fetchCustomers = useCallback(async () => {
         setLoading(true);
+        setError(null);
         try {
-            const response = await axios.get(`/api/Musteriler`);
+            const response = await axios.get(`${API_BASE_URL}/api/Musteriler`);
+            console.log('API Response:', response.data);
+            
             if (Array.isArray(response.data)) {
                 setCustomers(response.data);
             } else {
@@ -76,6 +79,7 @@ const Customers: React.FC = () => {
         } catch (error) {
             console.error('Müşteriler alınırken hata oluştu:', error);
             setError('Müşteri verileri alınamadı.');
+            setCustomers([]);
         } finally {
             setLoading(false);
         }
@@ -88,7 +92,7 @@ const Customers: React.FC = () => {
     const handleSave = async (customer: Partial<Customer>) => {
         setActionLoading(true);
         const method = customer.musteriID ? 'PUT' : 'POST';
-        const url = customer.musteriID ? `/api/Musteriler/${customer.musteriID}` : `/api/Musteriler`;
+        const url = customer.musteriID ? `${API_BASE_URL}/api/Musteriler/${customer.musteriID}` : `${API_BASE_URL}/api/Musteriler`;
 
         try {
             const response = await fetch(url, {
@@ -112,7 +116,7 @@ const Customers: React.FC = () => {
         
         setActionLoading(true);
         try {
-            const response = await fetch(`/api/Musteriler/${id}`, { method: 'DELETE' });
+            const response = await fetch(`${API_BASE_URL}/api/Musteriler/${id}`, { method: 'DELETE' });
             if (!response.ok) throw new Error('Müşteri silinemedi.');
             await fetchCustomers();
         } catch (err: any) {
@@ -144,23 +148,31 @@ const Customers: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {Array.isArray(customers) && customers.map(c => (
-                            <tr key={c.musteriID} className="border-b border-gray-200 hover:bg-gray-50">
-                                <td className="px-5 py-5 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap">{c.adSoyad}</p>
-                                </td>
-                                <td className="px-5 py-5 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap">{c.telefon}</p>
-                                </td>
-                                <td className="px-5 py-5 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap">{new Date(c.createdAt).toLocaleDateString('tr-TR')}</p>
-                                </td>
-                                <td className="px-5 py-5 text-sm text-right">
-                                    <button onClick={() => { setSelectedCustomer(c); setIsModalOpen(true); }} className="text-amber-600 hover:text-amber-900 mr-4">Düzenle</button>
-                                    <button onClick={() => handleDelete(c.musteriID)} className="text-red-600 hover:text-red-900">Sil</button>
+                        {Array.isArray(customers) && customers.length > 0 ? (
+                            customers.map(c => (
+                                <tr key={c.musteriID} className="border-b border-gray-200 hover:bg-gray-50">
+                                    <td className="px-5 py-5 text-sm">
+                                        <p className="text-gray-900 whitespace-no-wrap">{c.adSoyad}</p>
+                                    </td>
+                                    <td className="px-5 py-5 text-sm">
+                                        <p className="text-gray-900 whitespace-no-wrap">{c.telefon}</p>
+                                    </td>
+                                    <td className="px-5 py-5 text-sm">
+                                        <p className="text-gray-900 whitespace-no-wrap">{new Date(c.createdAt).toLocaleDateString('tr-TR')}</p>
+                                    </td>
+                                    <td className="px-5 py-5 text-sm text-right">
+                                        <button onClick={() => { setSelectedCustomer(c); setIsModalOpen(true); }} className="text-amber-600 hover:text-amber-900 mr-4">Düzenle</button>
+                                        <button onClick={() => handleDelete(c.musteriID)} className="text-red-600 hover:text-red-900">Sil</button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={4} className="px-5 py-5 text-center text-gray-500">
+                                    Henüz müşteri kaydı bulunmuyor.
                                 </td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </table>
             </div>

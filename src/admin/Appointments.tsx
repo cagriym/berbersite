@@ -1,17 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-// API'den gelen randevu nesnesinin yapısını tanımla
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://oktay-sac-tasarim1.azurewebsites.net';
+
+// Swagger.json'a göre API yapıları
 interface Appointment {
     randevuID: number;
+    musteriID: number;
     musteri: {
         adSoyad: string;
         telefon: string;
     };
-    randevuTarihi: string;
-    randevuServisler: { servisAdi: string; varsayilanUcret: number | null; }[];
+    randevuZamani: string;
+    randevuServisler: { 
+        servis: {
+            servisAdi: string; 
+            varsayilanUcret: number | null; 
+        }
+    }[];
     aciklama: string | null;
     ucret: number;
     tamamlandimi: boolean;
+    createdAt: string;
 }
 
 const Appointments: React.FC = () => {
@@ -24,9 +33,11 @@ const Appointments: React.FC = () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await fetch(`/api/Appointments`);
+            const response = await fetch(`${API_BASE_URL}/api/Appointments`);
             if (!response.ok) throw new Error('Randevu verileri çekilemedi.');
             const data = await response.json();
+            
+            console.log('Appointments API Response:', data);
             
             if (Array.isArray(data)) {
                 setAppointments(data);
@@ -36,7 +47,7 @@ const Appointments: React.FC = () => {
             }
         } catch (err: any) {
             setError(err.message);
-            setAppointments([]); // Hata durumunda boşalt
+            setAppointments([]);
         } finally {
             setLoading(false);
         }
@@ -54,8 +65,8 @@ const Appointments: React.FC = () => {
         setActionLoading(randevuID);
         try {
             const url = action === 'complete' 
-                ? `/api/Appointments/${randevuID}/complete`
-                : `/api/Appointments/${randevuID}`;
+                ? `${API_BASE_URL}/api/Appointments/${randevuID}/complete`
+                : `${API_BASE_URL}/api/Appointments/${randevuID}`;
             
             const method = action === 'complete' ? 'PUT' : 'DELETE';
             
@@ -89,55 +100,66 @@ const Appointments: React.FC = () => {
         <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-6">Randevu Yönetimi</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Array.isArray(appointments) && appointments.map((app) => (
-                    <div key={app.randevuID} className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ${app.tamamlandimi ? 'opacity-60' : ''}`}>
-                        <div className="p-5">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="font-bold text-lg text-gray-800">{app.musteri?.adSoyad || 'Bilinmeyen'}</p>
-                                    <p className="text-sm text-gray-500">{app.musteri?.telefon}</p>
+                {Array.isArray(appointments) && appointments.length > 0 ? (
+                    appointments.map((app) => (
+                        <div key={app.randevuID} className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ${app.tamamlandimi ? 'opacity-60' : ''}`}>
+                            <div className="p-5">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <p className="font-bold text-lg text-gray-800">{app.musteri?.adSoyad || 'Bilinmeyen'}</p>
+                                        <p className="text-sm text-gray-500">{app.musteri?.telefon}</p>
+                                    </div>
+                                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${app.tamamlandimi ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                        {app.tamamlandimi ? 'Tamamlandı' : 'Bekliyor'}
+                                    </span>
                                 </div>
-                                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${app.tamamlandimi ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                                    {app.tamamlandimi ? 'Tamamlandı' : 'Bekliyor'}
-                                </span>
-                            </div>
 
-                            <div className="mt-4">
-                                <p className="text-sm font-semibold text-gray-600">Randevu Tarihi:</p>
-                                <p className="text-gray-800">{new Date(app.randevuTarihi).toLocaleString('tr-TR', { dateStyle: 'long', timeStyle: 'short' })}</p>
-                            </div>
-                            
-                            <div className="mt-4">
-                                <p className="text-sm font-semibold text-gray-600">İstenen Servisler:</p>
-                                <ul className="list-disc list-inside text-gray-700">
-                                    {Array.isArray(app.randevuServisler) && app.randevuServisler.map(s => <li key={s.servisAdi}>{s.servisAdi} ({s.varsayilanUcret?.toLocaleString('tr-TR')} TL)</li>)}
-                                </ul>
-                            </div>
+                                <div className="mt-4">
+                                    <p className="text-sm font-semibold text-gray-600">Randevu Tarihi:</p>
+                                    <p className="text-gray-800">{new Date(app.randevuZamani).toLocaleString('tr-TR', { dateStyle: 'long', timeStyle: 'short' })}</p>
+                                </div>
+                                
+                                <div className="mt-4">
+                                    <p className="text-sm font-semibold text-gray-600">İstenen Servisler:</p>
+                                    <ul className="list-disc list-inside text-gray-700">
+                                        {Array.isArray(app.randevuServisler) && app.randevuServisler.map((rs, index) => (
+                                            <li key={index}>
+                                                {rs.servis?.servisAdi || 'Bilinmeyen Servis'} 
+                                                ({rs.servis?.varsayilanUcret?.toLocaleString('tr-TR') || 0} TL)
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
 
-                            {app.aciklama && <div className="mt-4 p-3 bg-gray-50 rounded-md">
-                                <p className="text-sm text-gray-600 italic">{app.aciklama}</p>
-                            </div>}
-                        </div>
-                        <div className="px-5 py-3 bg-gray-50 flex justify-end gap-3">
-                            {!app.tamamlandimi && (
+                                {app.aciklama && <div className="mt-4 p-3 bg-gray-50 rounded-md">
+                                    <p className="text-sm text-gray-600 italic">{app.aciklama}</p>
+                                </div>}
+                            </div>
+                            <div className="px-5 py-3 bg-gray-50 flex justify-end gap-3">
+                                {!app.tamamlandimi && (
+                                    <button
+                                        onClick={() => handleAction(app.randevuID, 'complete')}
+                                        disabled={actionLoading === app.randevuID}
+                                        className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors"
+                                    >
+                                        {actionLoading === app.randevuID ? '...' : 'Onayla'}
+                                    </button>
+                                )}
                                 <button
-                                    onClick={() => handleAction(app.randevuID, 'complete')}
+                                    onClick={() => handleAction(app.randevuID, 'delete')}
                                     disabled={actionLoading === app.randevuID}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors"
+                                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition-colors"
                                 >
-                                    {actionLoading === app.randevuID ? '...' : 'Onayla'}
+                                    {actionLoading === app.randevuID ? '...' : 'Sil'}
                                 </button>
-                            )}
-                            <button
-                                onClick={() => handleAction(app.randevuID, 'delete')}
-                                disabled={actionLoading === app.randevuID}
-                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:bg-gray-400 transition-colors"
-                            >
-                                {actionLoading === app.randevuID ? '...' : 'Sil'}
-                            </button>
+                            </div>
                         </div>
+                    ))
+                ) : (
+                    <div className="col-span-full text-center py-8 text-gray-500">
+                        Henüz randevu kaydı bulunmuyor.
                     </div>
-                ))}
+                )}
             </div>
         </div>
     );

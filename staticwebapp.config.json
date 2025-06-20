@@ -1,18 +1,16 @@
 {
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/static/media/*", "/static/css/*", "/static/js/*", "*.{png,jpg,gif,ico,svg}", "/api/*"]
+    "exclude": ["/static/media/*", "/static/css/*", "/static/js/*", "*.{png,jpg,gif,ico,svg}"]
   },
   "routes": [
     {
       "route": "/admin",
-      "rewrite": "/index.html",
-      "allowedRoles": ["authenticated"]
+      "rewrite": "/index.html"
     },
     {
       "route": "/admin/*",
-      "rewrite": "/index.html",
-      "allowedRoles": ["authenticated"]
+      "rewrite": "/index.html"
     }
   ],
   "responseOverrides": {

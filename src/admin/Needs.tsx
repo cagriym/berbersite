@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-// const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://oktay-sac-tasarim1.azurewebsites.net';
 
+// Swagger.json'a göre API yapıları
 interface Need {
     ihtiyacID: number;
     musteriID: number;
@@ -82,8 +83,8 @@ const Needs: React.FC = () => {
         setError(null);
         try {
             const [needsRes, customersRes] = await Promise.all([
-                fetch(`/api/Needs`),
-                fetch(`/api/Musteriler`)
+                fetch(`${API_BASE_URL}/api/Needs`),
+                fetch(`${API_BASE_URL}/api/Musteriler`)
             ]);
 
             if (!needsRes.ok) throw new Error('İhtiyaç verileri çekilemedi.');
@@ -91,6 +92,9 @@ const Needs: React.FC = () => {
 
             const needsData = await needsRes.json();
             const customersData = await customersRes.json();
+
+            console.log('Needs API Response:', needsData);
+            console.log('Customers API Response:', customersData);
 
             setNeeds(Array.isArray(needsData) ? needsData : []);
             setCustomers(Array.isArray(customersData) ? customersData : []);
@@ -100,8 +104,8 @@ const Needs: React.FC = () => {
 
         } catch (err: any) {
             setError(err.message);
-            setNeeds([]); // Hata durumunda boşalt
-            setCustomers([]); // Hata durumunda boşalt
+            setNeeds([]);
+            setCustomers([]);
         } finally {
             setLoading(false);
         }
@@ -114,7 +118,7 @@ const Needs: React.FC = () => {
     const handleSave = async (need: Partial<Need>) => {
         setActionLoading(true);
         const method = need.ihtiyacID ? 'PUT' : 'POST';
-        const url = need.ihtiyacID ? `/api/Needs/${need.ihtiyacID}` : `/api/Needs`;
+        const url = need.ihtiyacID ? `${API_BASE_URL}/api/Needs/${need.ihtiyacID}` : `${API_BASE_URL}/api/Needs`;
 
         try {
             const response = await fetch(url, {
@@ -138,7 +142,7 @@ const Needs: React.FC = () => {
         
         setActionLoading(true);
         try {
-            const response = await fetch(`/api/Needs/${id}`, { method: 'DELETE' });
+            const response = await fetch(`${API_BASE_URL}/api/Needs/${id}`, { method: 'DELETE' });
             if (!response.ok) throw new Error('İhtiyaç silinemedi.');
             await fetchData();
         } catch (err: any) {
@@ -171,26 +175,34 @@ const Needs: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {Array.isArray(needs) && needs.map(n => (
-                            <tr key={n.ihtiyacID} className="border-b border-gray-200 hover:bg-gray-50">
-                                <td className="px-5 py-5 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap">{n.musteri?.adSoyad || 'Bilinmeyen Müşteri'}</p>
-                                </td>
-                                <td className="px-5 py-5 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap">{n.ihtiyacTuru}</p>
-                                </td>
-                                <td className="px-5 py-5 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap">{n.aciklama}</p>
-                                </td>
-                                <td className="px-5 py-5 text-sm">
-                                    <p className="text-gray-900 whitespace-no-wrap">{new Date(n.createdAt).toLocaleDateString('tr-TR')}</p>
-                                </td>
-                                <td className="px-5 py-5 text-sm text-right">
-                                    <button onClick={() => { setSelectedNeed(n); setIsModalOpen(true); }} className="text-amber-600 hover:text-amber-900 mr-4">Düzenle</button>
-                                    <button onClick={() => handleDelete(n.ihtiyacID)} className="text-red-600 hover:text-red-900">Sil</button>
+                        {Array.isArray(needs) && needs.length > 0 ? (
+                            needs.map(n => (
+                                <tr key={n.ihtiyacID} className="border-b border-gray-200 hover:bg-gray-50">
+                                    <td className="px-5 py-5 text-sm">
+                                        <p className="text-gray-900 whitespace-no-wrap">{n.musteri?.adSoyad || 'Bilinmeyen Müşteri'}</p>
+                                    </td>
+                                    <td className="px-5 py-5 text-sm">
+                                        <p className="text-gray-900 whitespace-no-wrap">{n.ihtiyacTuru}</p>
+                                    </td>
+                                    <td className="px-5 py-5 text-sm">
+                                        <p className="text-gray-900 whitespace-no-wrap">{n.aciklama}</p>
+                                    </td>
+                                    <td className="px-5 py-5 text-sm">
+                                        <p className="text-gray-900 whitespace-no-wrap">{new Date(n.createdAt).toLocaleDateString('tr-TR')}</p>
+                                    </td>
+                                    <td className="px-5 py-5 text-sm text-right">
+                                        <button onClick={() => { setSelectedNeed(n); setIsModalOpen(true); }} className="text-amber-600 hover:text-amber-900 mr-4">Düzenle</button>
+                                        <button onClick={() => handleDelete(n.ihtiyacID)} className="text-red-600 hover:text-red-900">Sil</button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={5} className="px-5 py-5 text-center text-gray-500">
+                                    Henüz ihtiyaç kaydı bulunmuyor.
                                 </td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </table>
             </div>
