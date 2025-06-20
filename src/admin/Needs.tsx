@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+// const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 interface Need {
     ihtiyacID: number;
@@ -82,8 +82,8 @@ const Needs: React.FC = () => {
         setError(null);
         try {
             const [needsRes, customersRes] = await Promise.all([
-                fetch(`${API_BASE_URL}/api/Needs`),
-                fetch(`${API_BASE_URL}/api/Musteriler`)
+                fetch(`/api/Needs`),
+                fetch(`/api/Musteriler`)
             ]);
 
             if (!needsRes.ok) throw new Error('İhtiyaç verileri çekilemedi.');
@@ -114,7 +114,7 @@ const Needs: React.FC = () => {
     const handleSave = async (need: Partial<Need>) => {
         setActionLoading(true);
         const method = need.ihtiyacID ? 'PUT' : 'POST';
-        const url = need.ihtiyacID ? `${API_BASE_URL}/api/Needs/${need.ihtiyacID}` : `${API_BASE_URL}/api/Needs`;
+        const url = need.ihtiyacID ? `/api/Needs/${need.ihtiyacID}` : `/api/Needs`;
 
         try {
             const response = await fetch(url, {
@@ -138,7 +138,7 @@ const Needs: React.FC = () => {
         
         setActionLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/Needs/${id}`, { method: 'DELETE' });
+            const response = await fetch(`/api/Needs/${id}`, { method: 'DELETE' });
             if (!response.ok) throw new Error('İhtiyaç silinemedi.');
             await fetchData();
         } catch (err: any) {

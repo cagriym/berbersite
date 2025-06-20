@@ -19,13 +19,12 @@ const Appointments: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [actionLoading, setActionLoading] = useState<number | null>(null);
-    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
     const fetchAppointments = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await fetch(`${API_BASE_URL}/api/Appointments`);
+            const response = await fetch(`/api/Appointments`);
             if (!response.ok) throw new Error('Randevu verileri çekilemedi.');
             const data = await response.json();
             
@@ -41,7 +40,7 @@ const Appointments: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [API_BASE_URL]);
+    }, []);
 
     useEffect(() => {
         fetchAppointments();
@@ -55,8 +54,8 @@ const Appointments: React.FC = () => {
         setActionLoading(randevuID);
         try {
             const url = action === 'complete' 
-                ? `${API_BASE_URL}/Appointments/${randevuID}/complete`
-                : `${API_BASE_URL}/Appointments/${randevuID}`;
+                ? `/api/Appointments/${randevuID}/complete`
+                : `/api/Appointments/${randevuID}`;
             
             const method = action === 'complete' ? 'PUT' : 'DELETE';
             

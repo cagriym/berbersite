@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+// const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 // API'den gelen müşteri nesnesinin yapısını tanımla
 interface Customer {
@@ -66,7 +66,7 @@ const Customers: React.FC = () => {
     const fetchCustomers = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`${API_BASE_URL}/api/Musteriler`);
+            const response = await axios.get(`/api/Musteriler`);
             if (Array.isArray(response.data)) {
                 setCustomers(response.data);
             } else {
@@ -88,7 +88,7 @@ const Customers: React.FC = () => {
     const handleSave = async (customer: Partial<Customer>) => {
         setActionLoading(true);
         const method = customer.musteriID ? 'PUT' : 'POST';
-        const url = customer.musteriID ? `${API_BASE_URL}/api/Musteriler/${customer.musteriID}` : `${API_BASE_URL}/api/Musteriler`;
+        const url = customer.musteriID ? `/api/Musteriler/${customer.musteriID}` : `/api/Musteriler`;
 
         try {
             const response = await fetch(url, {
@@ -112,7 +112,7 @@ const Customers: React.FC = () => {
         
         setActionLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/Musteriler/${id}`, { method: 'DELETE' });
+            const response = await fetch(`/api/Musteriler/${id}`, { method: 'DELETE' });
             if (!response.ok) throw new Error('Müşteri silinemedi.');
             await fetchCustomers();
         } catch (err: any) {
