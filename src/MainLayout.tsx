@@ -203,6 +203,15 @@ const MainLayout = () => {
           setLoading(false);
           return;
         }
+        
+        // Randevu çakışması kontrolü
+        const hasConflict = await checkAppointmentConflict(appointmentDateTime);
+        if (hasConflict) {
+          setMessage('Seçilen randevu zamanında randevu var. Lütfen başka bir tarih veya saat seçin.');
+          setMessageType('error');
+          setLoading(false);
+          return;
+        }
         const randevuData = {
           customer: { ad: name, soyad: surname, telefon: cleanedPhone },
           appointment: {
@@ -254,15 +263,39 @@ const MainLayout = () => {
         }
     }, []);
 
+    // Randevu çakışması kontrolü
+    const checkAppointmentConflict = async (appointmentDateTime: Date): Promise<boolean> => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/Appointments`);
+            if (response.ok) {
+                const appointments = await response.json();
+                const selectedTime = appointmentDateTime.getTime();
+                
+                // Seçilen randevu zamanından 30 dakika öncesi ve sonrası
+                const conflictStart = selectedTime - (30 * 60 * 1000); // 30 dakika öncesi
+                const conflictEnd = selectedTime + (30 * 60 * 1000);   // 30 dakika sonrası
+                
+                // Aynı gün ve çakışan saatte randevu var mı kontrol et
+                const hasConflict = appointments.some((app: any) => {
+                    const appTime = new Date(app.randevuZamani).getTime();
+                    const appDate = new Date(app.randevuZamani).toDateString();
+                    const selectedDate = appointmentDateTime.toDateString();
+                    
+                    // Aynı gün ve çakışan saat
+                    return appDate === selectedDate && appTime >= conflictStart && appTime <= conflictEnd;
+                });
+                
+                return hasConflict;
+            }
+        } catch (error) {
+            console.error('Randevu çakışması kontrol edilirken hata:', error);
+        }
+        return false;
+    };
+
     useEffect(() => {
         fetchServices();
     }, [fetchServices]);
-
-    useEffect(() => {
-        if (services.length > 0 && selectedServiceIds.length === 0) {
-            setSelectedServiceIds([services[0].servisID]);
-        }
-    }, [services, selectedServiceIds.length]);
 
     useEffect(() => {
         // Toplam ücreti hesapla
