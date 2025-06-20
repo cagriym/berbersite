@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaCalendarAlt, FaUsers, FaClipboardList, FaMoneyBillWave, FaChartLine, FaDollarSign, FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { FaCalendarAlt, FaUsers, FaMoneyBillWave, FaChartLine, FaArrowUp, FaArrowDown } from 'react-icons/fa';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://oktay-sac-tasarim1.azurewebsites.net/api';
 
