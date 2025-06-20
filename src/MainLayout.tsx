@@ -62,7 +62,7 @@ const MainLayout = () => {
     const [phone, setPhone] = useState('');
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [selectedTime, setSelectedTime] = useState('09:00');
-    const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
+    const [selectedServiceIds, setSelectedServiceIds] = useState<number[]>([]);
     const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(false);
     const [enteredCode, setEnteredCode] = useState('');
@@ -73,6 +73,7 @@ const MainLayout = () => {
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState<'success' | 'error' | ''>('');
     const [showAppointment, setShowAppointment] = useState(false);
+    const [totalPrice, setTotalPrice] = useState<number>(0);
 
     useEffect(() => {
         if (message) {
@@ -90,11 +91,11 @@ const MainLayout = () => {
         setPhone('');
         setSelectedDate(new Date().toISOString().split('T')[0]);
         setSelectedTime('09:00');
-        setSelectedServiceId(services.length > 0 ? services[0].servisID : null);
+        setSelectedServiceIds([]);
         setEnteredCode('');
         setIsCodeSent(false);
         setIsPhoneVerified(false);
-    }, [services]);
+    }, []);
 
     const handleSendCode = async () => {
         const cleanedPhone = phone.replace(/\D/g, '');
@@ -174,8 +175,8 @@ const MainLayout = () => {
         setLoading(true);
         setMessage('');
         setMessageType('');
-        if (!name.trim() || !surname.trim() || !phone.trim() || !selectedDate || !selectedTime || selectedServiceId === null) {
-          setMessage('Lütfen tüm alanları doldurun.');
+        if (!name.trim() || !surname.trim() || !phone.trim() || !selectedDate || !selectedTime || selectedServiceIds.length === 0) {
+          setMessage('Lütfen tüm alanları doldurun ve en az bir servis seçin.');
           setMessageType('error');
           setLoading(false);
           return;
@@ -206,19 +207,17 @@ const MainLayout = () => {
           setLoading(false);
           return;
         }
-        const selectedService = services.find(s => s.servisID === selectedServiceId);
-        if (!selectedService) {
-          setMessage('Geçersiz servis seçimi.');
-          setMessageType('error');
-          setLoading(false);
-          return;
-        }
         const randevuData = {
-          musteri: { adi: name, soyad: surname, telefon: cleanedPhone },
-          randevu: { randevuZamani: appointmentDateTime.toISOString(), servisID: selectedServiceId, aciklama: 'Randevu web sitesinden alındı.' }
+          customer: { ad: name, soyad: surname, telefon: cleanedPhone },
+          appointment: {
+            servisIDList: selectedServiceIds,
+            randevuZamani: appointmentDateTime.toISOString(),
+            aciklama: 'Randevu web sitesinden alındı.',
+            ucret: totalPrice
+          }
         };
         try {
-          const response = await fetch(`${API_BASE_URL}/Appointments/create`, {
+          const response = await fetch(`${API_BASE_URL}/Appointments`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(randevuData)
@@ -230,12 +229,10 @@ const MainLayout = () => {
             setShowAppointment(false);
           } else {
             const errorText = await response.text();
-            console.error('Sunucudan gelen hata:', errorText);
             setMessage(errorText || 'Randevu oluşturulurken bir hata oluştu.');
             setMessageType('error');
           }
         } catch (error: any) {
-          console.error('Randevu gönderme hatası:', error);
           setMessage(`Bir ağ hatası oluştu: ${error.message}`);
           setMessageType('error');
         } finally {
@@ -250,8 +247,8 @@ const MainLayout = () => {
             if (response.ok) {
                 const data: Service[] = await response.json();
                 setServices(data);
-                if (data.length > 0 && selectedServiceId === null) {
-                    setSelectedServiceId(data[0].servisID);
+                if (data.length > 0 && selectedServiceIds.length === 0) {
+                    setSelectedServiceIds([data[0].servisID]);
                 }
             } else {
                 throw new Error('Servisler yüklenemedi.');
@@ -262,11 +259,23 @@ const MainLayout = () => {
         } finally {
             setLoading(false);
         }
-    }, [selectedServiceId]);
+    }, [selectedServiceIds]);
 
     useEffect(() => {
         fetchServices();
     }, [fetchServices]);
+
+    useEffect(() => {
+        if (services.length > 0 && selectedServiceIds.length === 0) {
+            setSelectedServiceIds([services[0].servisID]);
+        }
+    }, [services]);
+
+    useEffect(() => {
+        // Toplam ücreti hesapla
+        const total = services.filter(s => selectedServiceIds.includes(s.servisID)).reduce((sum, s) => sum + (s.varsayilanUcret || 0), 0);
+        setTotalPrice(total);
+    }, [selectedServiceIds, services]);
 
     const homeRef = useRef<HTMLDivElement>(null);
     const aboutRef = useRef<HTMLDivElement>(null);
@@ -335,13 +344,13 @@ const MainLayout = () => {
                         setSelectedDate={setSelectedDate}
                         selectedTime={selectedTime}
                         setSelectedTime={setSelectedTime}
-                        selectedServiceId={selectedServiceId}
-                        setSelectedServiceId={setSelectedServiceId}
+                        selectedServiceIds={selectedServiceIds}
+                        setSelectedServiceIds={setSelectedServiceIds}
                         services={services}
+                        totalPrice={totalPrice}
                         loading={loading}
                         enteredCode={enteredCode}
                         setEnteredCode={setEnteredCode}
-
                         isCodeSent={isCodeSent}
                         isPhoneVerified={isPhoneVerified}
                         isSendingCode={isSendingCode}
