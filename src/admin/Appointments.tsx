@@ -90,25 +90,6 @@ const Appointments: React.FC = () => {
         setFilteredAppointments(filtered);
     }, [appointments, searchDate, searchTime]);
 
-    // Tarih formatını düzeltme fonksiyonu
-    const formatDate = (dateString: string) => {
-        try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) {
-                return 'Geçersiz Tarih';
-            }
-            return date.toLocaleString('tr-TR', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        } catch (error) {
-            return 'Geçersiz Tarih';
-        }
-    };
-
     // Son randevuları alma (son 10 randevu)
     const recentAppointments = appointments
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -144,6 +125,19 @@ const Appointments: React.FC = () => {
         } finally {
             setActionLoading(null);
         }
+    };
+
+    // Servis adlarını güvenli şekilde gösterme fonksiyonu
+    const getServiceNames = (appointment: Appointment) => {
+        if (appointment.servisAdlari && appointment.servisAdlari.trim()) {
+            return appointment.servisAdlari;
+        }
+        
+        if (appointment.randevuServisler && appointment.randevuServisler.length > 0) {
+            return appointment.randevuServisler.map(rs => rs.servisAdi || 'Bilinmeyen Servis').join(', ');
+        }
+        
+        return 'Servis bilgisi yok';
     };
 
     if (loading) return (
@@ -236,7 +230,7 @@ const Appointments: React.FC = () => {
                                     
                                     <div className="mt-4">
                                         <p className="text-sm font-semibold text-gray-600">İstenen Servisler:</p>
-                                        <p className="text-gray-700">{app.servisAdlari || 'Servis bilgisi yok'}</p>
+                                        <p className="text-gray-700">{getServiceNames(app)}</p>
                                     </div>
 
                                     {app.aciklama && <div className="mt-4 p-3 bg-gray-50 rounded-md">
