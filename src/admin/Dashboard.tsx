@@ -1,216 +1,346 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaCalendarAlt, FaUsers, FaClipboardList, FaMoneyBillWave, FaChartLine, FaDollarSign, FaArrowUp, FaArrowDown } from 'react-icons/fa';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://oktay-sac-tasarim1.azurewebsites.net';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://oktay-sac-tasarim1.azurewebsites.net/api';
 
 interface StatCardProps {
     title: string;
-    value: number | string;
-    icon: string;
+    value: string | number;
+    icon: React.ReactNode;
     color: string;
-    subtitle?: string;
+    change?: string;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, subtitle }) => (
-    <div className={`p-6 bg-white rounded-lg shadow-lg flex items-center space-x-6 border-l-4 ${color}`}>
-        <div className={`text-4xl ${color.replace('border', 'text').replace('-l-4', '-600')}`}>
-            <i className={`fas ${icon}`}></i>
-        </div>
-        <div>
-            <p className="text-lg font-semibold text-gray-700">{title}</p>
-            <p className="text-3xl font-bold text-gray-900">{value}</p>
-            {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+interface FinancialData {
+    year: number;
+    month: number;
+    monthName: string;
+    income: number;
+    expenses: number;
+    netProfit: number;
+    breakdown: {
+        salary: number;
+        needs: number;
+        appointments: number;
+    };
+}
+
+interface MonthOption {
+    year: number;
+    month: number;
+    name: string;
+    isCurrent: boolean;
+}
+
+const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, change }) => (
+    <div className={`bg-white p-6 rounded-lg shadow-md border-l-4 ${color}`}>
+        <div className="flex items-center justify-between">
+            <div>
+                <p className="text-sm font-medium text-gray-600">{title}</p>
+                <p className="text-2xl font-bold text-gray-900">{value}</p>
+                {change && (
+                    <p className={`text-sm ${change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+                        {change}
+                    </p>
+                )}
+            </div>
+            <div className="text-3xl text-gray-400">{icon}</div>
         </div>
     </div>
 );
 
 const Dashboard: React.FC = () => {
-    const [stats, setStats] = useState({
-        totalAppointments: 0,
-        pendingAppointments: 0,
-        completedAppointments: 0,
-        totalCustomers: 0,
-        totalNeeds: 0,
-        totalRevenue: 0,
-        monthlyRevenue: 0,
-        averageAppointmentValue: 0,
-    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [stats, setStats] = useState<any>(null);
+    const [financialData, setFinancialData] = useState<FinancialData | null>(null);
+    const [availableMonths, setAvailableMonths] = useState<MonthOption[]>([]);
+    const [selectedMonth, setSelectedMonth] = useState<{ year: number; month: number } | null>(null);
     const navigate = useNavigate();
 
     const fetchData = useCallback(async () => {
         setLoading(true);
-        setError(null);
         try {
             const [appointmentsRes, customersRes, needsRes] = await Promise.all([
-                fetch(`${API_BASE_URL}/api/Appointments`),
-                fetch(`${API_BASE_URL}/api/Musteriler`),
-                fetch(`${API_BASE_URL}/api/Needs`),
+                fetch(`${API_BASE_URL}/Appointments`),
+                fetch(`${API_BASE_URL}/Musteriler`),
+                fetch(`${API_BASE_URL}/Needs`),
             ]);
 
-            if (!appointmentsRes.ok) throw new Error('Randevu verileri çekilemedi.');
-            if (!customersRes.ok) throw new Error('Müşteri verileri çekilemedi.');
-            if (!needsRes.ok) throw new Error('İhtiyaç verileri çekilemedi.');
+            if (!appointmentsRes.ok || !customersRes.ok || !needsRes.ok) {
+                throw new Error('Veriler yüklenemedi');
+            }
 
-            const appointments = await appointmentsRes.json();
-            const customers = await customersRes.json();
-            const needs = await needsRes.json();
+            const [appointmentsData, customersData, needsData] = await Promise.all([
+                appointmentsRes.json(),
+                customersRes.json(),
+                needsRes.json(),
+            ]);
 
-            console.log('Dashboard API Responses:', { appointments, customers, needs });
+            // Veri doğrulama
+            const appointments = Array.isArray(appointmentsData) ? appointmentsData : [];
+            const customers = Array.isArray(customersData) ? customersData : [];
+            const needs = Array.isArray(needsData) ? needsData : [];
 
-            // Verilerin array olduğundan emin ol
-            const appointmentsArray = Array.isArray(appointments) ? appointments : [];
-            const customersArray = Array.isArray(customers) ? customers : [];
-            const needsArray = Array.isArray(needs) ? needs : [];
+            // İstatistikleri hesapla
+            const totalAppointments = appointments.length;
+            const totalCustomers = customers.length;
+            const totalNeeds = needs.length;
 
-            // Mali hesaplamalar
-            const completedAppointments = appointmentsArray.filter((a: any) => a.tamamlandimi);
-            const totalRevenue = completedAppointments.reduce((sum: number, app: any) => sum + (app.ucret || 0), 0);
-            
-            // Bu ayki gelir hesaplama
+            // Gelir hesaplama (randevular)
+            const totalRevenue = appointments.reduce((sum: number, app: any) => {
+                return sum + (app.ucret || 0);
+            }, 0);
+
+            // Aylık gelir (bu ay)
             const currentMonth = new Date().getMonth();
             const currentYear = new Date().getFullYear();
-            const monthlyRevenue = completedAppointments
+            const monthlyRevenue = appointments
                 .filter((app: any) => {
-                    const appDate = new Date(app.createdAt);
+                    const appDate = new Date(app.randevuZamani);
                     return appDate.getMonth() === currentMonth && appDate.getFullYear() === currentYear;
                 })
                 .reduce((sum: number, app: any) => sum + (app.ucret || 0), 0);
 
-            const averageAppointmentValue = completedAppointments.length > 0 
-                ? totalRevenue / completedAppointments.length 
-                : 0;
+            // Ortalama randevu değeri
+            const avgAppointmentValue = totalAppointments > 0 ? totalRevenue / totalAppointments : 0;
 
             setStats({
-                totalAppointments: appointmentsArray.length,
-                pendingAppointments: appointmentsArray.filter((a: any) => !a.tamamlandimi).length,
-                completedAppointments: completedAppointments.length,
-                totalCustomers: customersArray.length,
-                totalNeeds: needsArray.length,
-                totalRevenue: totalRevenue,
-                monthlyRevenue: monthlyRevenue,
-                averageAppointmentValue: averageAppointmentValue,
+                totalAppointments,
+                totalCustomers,
+                totalNeeds,
+                totalRevenue,
+                monthlyRevenue,
+                avgAppointmentValue
             });
 
-        } catch (err: any) {
-            console.error('Dashboard fetch error:', err);
-            setError(err.message);
-            // Hata durumunda varsayılan değerler
-            setStats({
-                totalAppointments: 0,
-                pendingAppointments: 0,
-                completedAppointments: 0,
-                totalCustomers: 0,
-                totalNeeds: 0,
-                totalRevenue: 0,
-                monthlyRevenue: 0,
-                averageAppointmentValue: 0,
-            });
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Bilinmeyen bir hata oluştu');
         } finally {
             setLoading(false);
         }
     }, []);
 
+    const fetchFinancialData = useCallback(async (year: number, month: number) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/Personel/financial?year=${year}&month=${month}`);
+            if (response.ok) {
+                const data = await response.json();
+                setFinancialData(data);
+            }
+        } catch (error) {
+            console.error('Mali veriler yüklenemedi:', error);
+        }
+    }, []);
+
+    const fetchAvailableMonths = useCallback(async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/Personel/financial/months`);
+            if (response.ok) {
+                const data = await response.json();
+                setAvailableMonths(data.months);
+                
+                // Varsayılan olarak bu ayı seç
+                const currentMonth = data.months.find((m: MonthOption) => m.isCurrent);
+                if (currentMonth) {
+                    setSelectedMonth({ year: currentMonth.year, month: currentMonth.month });
+                    fetchFinancialData(currentMonth.year, currentMonth.month);
+                }
+            }
+        } catch (error) {
+            console.error('Ay listesi yüklenemedi:', error);
+        }
+    }, [fetchFinancialData]);
+
     useEffect(() => {
         fetchData();
-    }, [fetchData]);
-    
-    if (loading) return <div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-amber-500"></div></div>;
-    if (error) return <div className="p-4 text-red-700 bg-red-100 rounded-lg">Hata: {error}</div>;
+        fetchAvailableMonths();
+    }, [fetchData, fetchAvailableMonths]);
+
+    const handleMonthChange = (year: number, month: number) => {
+        setSelectedMonth({ year, month });
+        fetchFinancialData(year, month);
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                {error}
+            </div>
+        );
+    }
 
     return (
-        <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-8">Gösterge Paneli</h1>
-            
-            {/* Genel İstatistikler */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <StatCard 
-                    title="Toplam Randevu" 
-                    value={stats.totalAppointments} 
-                    icon="fa-calendar-alt" 
-                    color="border-blue-500" 
-                />
-                <StatCard 
-                    title="Bekleyen Randevu" 
-                    value={stats.pendingAppointments} 
-                    icon="fa-hourglass-half" 
-                    color="border-yellow-500" 
-                />
-                <StatCard 
-                    title="Tamamlanan Randevu" 
-                    value={stats.completedAppointments} 
-                    icon="fa-check-circle" 
-                    color="border-green-500" 
-                />
-                <StatCard 
-                    title="Toplam Müşteri" 
-                    value={stats.totalCustomers} 
-                    icon="fa-users" 
-                    color="border-purple-500" 
-                />
-            </div>
-
-            {/* Mali Durum */}
-            <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Mali Durum</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <StatCard 
-                        title="Toplam Gelir" 
-                        value={`${stats.totalRevenue.toLocaleString('tr-TR')} TL`} 
-                        icon="fa-money-bill-wave" 
-                        color="border-green-500"
-                        subtitle="Tüm zamanlar"
-                    />
-                    <StatCard 
-                        title="Bu Ay Gelir" 
-                        value={`${stats.monthlyRevenue.toLocaleString('tr-TR')} TL`} 
-                        icon="fa-chart-line" 
-                        color="border-blue-500"
-                        subtitle="Bu ay"
-                    />
-                    <StatCard 
-                        title="Ortalama Randevu" 
-                        value={`${stats.averageAppointmentValue.toLocaleString('tr-TR')} TL`} 
-                        icon="fa-calculator" 
-                        color="border-orange-500"
-                        subtitle="Tamamlanan randevular"
-                    />
+        <div className="space-y-6">
+            {/* Başlık */}
+            <div className="flex justify-between items-center">
+                <h1 className="text-3xl font-bold text-gray-900">Gösterge Paneli</h1>
+                <div className="text-sm text-gray-500">
+                    Son güncelleme: {new Date().toLocaleString('tr-TR')}
                 </div>
             </div>
 
-            {/* İhtiyaç Yönetimi */}
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">İhtiyaç Yönetimi</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <StatCard 
-                        title="Toplam İhtiyaç" 
-                        value={stats.totalNeeds} 
-                        icon="fa-box-open" 
-                        color="border-indigo-500"
-                        subtitle="Kayıtlı ihtiyaç türü"
-                    />
-                    <div className="p-6 bg-gray-50 rounded-lg">
-                        <h3 className="text-lg font-semibold text-gray-700 mb-4">Hızlı İşlemler</h3>
-                        <div className="space-y-3">
-                            <button 
-                                onClick={() => navigate('/admin/needs')}
-                                className="w-full px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
-                            >
-                                <i className="fas fa-plus mr-2"></i>Yeni İhtiyaç Ekle
-                            </button>
-                            <button 
-                                onClick={() => navigate('/admin/appointments')}
-                                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                            >
-                                <i className="fas fa-calendar-plus mr-2"></i>Yeni Randevu
-                            </button>
-                            <button 
-                                onClick={() => navigate('/admin/customers')}
-                                className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                            >
-                                <i className="fas fa-user-plus mr-2"></i>Yeni Müşteri
-                            </button>
+            {/* Genel İstatistikler */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <StatCard
+                    title="Toplam Randevu"
+                    value={stats?.totalAppointments || 0}
+                    icon={<FaCalendarAlt />}
+                    color="border-blue-500"
+                />
+                <StatCard
+                    title="Toplam Müşteri"
+                    value={stats?.totalCustomers || 0}
+                    icon={<FaUsers />}
+                    color="border-green-500"
+                />
+                <StatCard
+                    title="Toplam Gelir"
+                    value={`${(stats?.totalRevenue || 0).toLocaleString()} ₺`}
+                    icon={<FaMoneyBillWave />}
+                    color="border-yellow-500"
+                />
+                <StatCard
+                    title="Aylık Gelir"
+                    value={`${(stats?.monthlyRevenue || 0).toLocaleString()} ₺`}
+                    icon={<FaChartLine />}
+                    color="border-purple-500"
+                />
+            </div>
+
+            {/* Mali Durum Bölümü */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900">Mali Durum</h2>
+                    <div className="flex items-center space-x-2">
+                        <label className="text-sm font-medium text-gray-700">Ay Seçin:</label>
+                        <select
+                            value={selectedMonth ? `${selectedMonth.year}-${selectedMonth.month}` : ''}
+                            onChange={(e) => {
+                                const [year, month] = e.target.value.split('-').map(Number);
+                                handleMonthChange(year, month);
+                            }}
+                            className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            {availableMonths.map((month) => (
+                                <option key={`${month.year}-${month.month}`} value={`${month.year}-${month.month}`}>
+                                    {month.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                {financialData && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* Gelir */}
+                        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-green-600">Toplam Gelir</p>
+                                    <p className="text-2xl font-bold text-green-800">
+                                        {financialData.income.toLocaleString()} ₺
+                                    </p>
+                                </div>
+                                <FaArrowUp className="text-green-600 text-2xl" />
+                            </div>
+                            <p className="text-xs text-green-600 mt-1">Randevu gelirleri</p>
+                        </div>
+
+                        {/* Giderler */}
+                        <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-red-600">Toplam Gider</p>
+                                    <p className="text-2xl font-bold text-red-800">
+                                        {financialData.expenses.toLocaleString()} ₺
+                                    </p>
+                                </div>
+                                <FaArrowDown className="text-red-600 text-2xl" />
+                            </div>
+                            <div className="text-xs text-red-600 mt-1">
+                                <p>Maaş: {financialData.breakdown.salary.toLocaleString()} ₺</p>
+                                <p>İhtiyaçlar: {financialData.breakdown.needs.toLocaleString()} ₺</p>
+                            </div>
+                        </div>
+
+                        {/* Net Kar/Zarar */}
+                        <div className={`p-4 rounded-lg border ${
+                            financialData.netProfit >= 0 
+                                ? 'bg-green-50 border-green-200' 
+                                : 'bg-red-50 border-red-200'
+                        }`}>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-600">Net Kar/Zarar</p>
+                                    <p className={`text-2xl font-bold ${
+                                        financialData.netProfit >= 0 ? 'text-green-800' : 'text-red-800'
+                                    }`}>
+                                        {financialData.netProfit >= 0 ? '+' : ''}{financialData.netProfit.toLocaleString()} ₺
+                                    </p>
+                                </div>
+                                {financialData.netProfit >= 0 ? (
+                                    <FaArrowUp className="text-green-600 text-2xl" />
+                                ) : (
+                                    <FaArrowDown className="text-red-600 text-2xl" />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Hızlı İşlemler */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-white rounded-lg shadow-md p-6">
+                    <h3 className="text-lg font-semibold text-gray-700 mb-4">Hızlı İşlemler</h3>
+                    <div className="space-y-3">
+                        <button 
+                            onClick={() => navigate('/admin/needs')}
+                            className="w-full px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+                        >
+                            <i className="fas fa-plus mr-2"></i>Yeni İhtiyaç Ekle
+                        </button>
+                        <button 
+                            onClick={() => navigate('/admin/appointments')}
+                            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            <i className="fas fa-calendar-plus mr-2"></i>Yeni Randevu
+                        </button>
+                        <button 
+                            onClick={() => navigate('/admin/customers')}
+                            className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        >
+                            <i className="fas fa-user-plus mr-2"></i>Yeni Müşteri
+                        </button>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-md p-6">
+                    <h3 className="text-lg font-semibold text-gray-700 mb-4">Detaylı İstatistikler</h3>
+                    <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Ortalama Randevu Değeri:</span>
+                            <span className="font-semibold">{stats?.avgAppointmentValue?.toFixed(2) || 0} ₺</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Toplam İhtiyaç:</span>
+                            <span className="font-semibold">{stats?.totalNeeds || 0}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Aktif Müşteri Oranı:</span>
+                            <span className="font-semibold">
+                                {stats?.totalCustomers > 0 ? Math.round((stats.totalAppointments / stats.totalCustomers) * 100) : 0}%
+                            </span>
                         </div>
                     </div>
                 </div>

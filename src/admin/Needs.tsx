@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://oktay-sac-tasarim1.azurewebsites.net';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://oktay-sac-tasarim1.azurewebsites.net/api';
 
 // Basitleştirilmiş ihtiyaç yapısı
 interface Need {
@@ -99,7 +99,7 @@ const Needs: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/Needs`);
+            const response = await fetch(`${API_BASE_URL}/Needs`);
             if (!response.ok) throw new Error('İhtiyaçlar yüklenemedi');
             const data = await response.json();
             if (Array.isArray(data)) {
@@ -124,8 +124,8 @@ const Needs: React.FC = () => {
         if (!selectedNeed) return;
 
         const url = selectedNeed.ihtiyacID
-            ? `${API_BASE_URL}/api/Needs/${selectedNeed.ihtiyacID}`
-            : `${API_BASE_URL}/api/Needs`;
+            ? `${API_BASE_URL}/Needs/${selectedNeed.ihtiyacID}`
+            : `${API_BASE_URL}/Needs`;
 
         const method = selectedNeed.ihtiyacID ? 'PUT' : 'POST';
 
@@ -155,7 +155,7 @@ const Needs: React.FC = () => {
         
         setActionLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/Needs/${id}`, { method: 'DELETE' });
+            const response = await fetch(`${API_BASE_URL}/Needs/${id}`, { method: 'DELETE' });
             if (!response.ok) throw new Error('İhtiyaç silinemedi.');
             await fetchNeeds();
         } catch (err: any) {
