@@ -19,16 +19,6 @@ interface Service {
   varsayilanUcret: number | null | undefined;
 }
 
-// İhtiyaç (Gider) verilerini temsil eden arayüz (API'den gelen veriye göre camelCase)
-interface Need {
-  ihtiyacID: number;
-  ad: string;
-  miktar: number;
-  birimFiyat: number | null | undefined;
-  toplamFiyat: number | null | undefined;
-  createdAt: string; // API'den gelen yaratılma tarihi
-}
-
 const backgroundImages = [
   '/oktayberber1.png',
   '/oktayberber2.png',
