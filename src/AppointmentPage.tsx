@@ -26,16 +26,15 @@ interface AppointmentPageProps {
   handleSubmit: (e: React.FormEvent) => void;
   message: string;
   messageType: 'success' | 'error' | '';
+  closeModal: () => void;
 }
 
 const AppointmentPage: React.FC<AppointmentPageProps> = ({
-  name, setName, surname, setSurname, phone, setPhone, selectedDate, setSelectedDate, selectedTime, setSelectedTime, selectedServiceId, setSelectedServiceId, services, loading, enteredCode, setEnteredCode, isCodeSent, isPhoneVerified, isSendingCode, isVerifyingCode, handleSendCode, handleVerifyCode, handleSubmit, message, messageType
+  name, setName, surname, setSurname, phone, setPhone, selectedDate, setSelectedDate, selectedTime, setSelectedTime, selectedServiceId, setSelectedServiceId, services, loading, enteredCode, setEnteredCode, isCodeSent, isPhoneVerified, isSendingCode, isVerifyingCode, handleSendCode, handleVerifyCode, handleSubmit, message, messageType, closeModal
 }) => (
-  <div className="min-h-[60vh] flex flex-col items-center justify-center pt-16 pb-8 relative">
-    {/* Dekoratif ikonlar (daha az ve daha küçük) */}
-    <div className="absolute left-4 top-16 animate-bounce text-amber-400 text-2xl opacity-40 select-none"><i className="fas fa-calendar-check"></i></div>
-    <div className="absolute right-4 top-24 animate-pulse text-orange-400 text-2xl opacity-30 select-none"><i className="fas fa-user-clock"></i></div>
-    <div className="w-full max-w-xl bg-white/95 p-6 rounded-xl shadow-xl border-2 border-amber-100 backdrop-blur-md z-10 animate-fade-in">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div className="w-full max-w-xl bg-white/95 p-6 rounded-xl shadow-xl border-2 border-amber-100 relative">
+      <button onClick={closeModal} className="absolute top-2 right-3 text-2xl text-gray-500 hover:text-red-600 transition">&times;</button>
       <h2 className="text-2xl font-extrabold text-amber-900 mb-4 text-center drop-shadow">Randevu Formu</h2>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="col-span-1">
