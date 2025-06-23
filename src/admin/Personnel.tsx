@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FaUserPlus, FaEdit, FaTrash, FaSearch, FaChartBar, FaToggleOn, FaToggleOff } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaSearch, FaChartBar, FaToggleOn, FaToggleOff } from 'react-icons/fa';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://oktay-sac-tasarim1.azurewebsites.net/api';
 
