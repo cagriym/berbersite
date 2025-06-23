@@ -57,11 +57,13 @@ const CustomerModal = ({ customer, onClose, onSave, loading }: { customer: Parti
 
 const Customers: React.FC = () => {
     const [customers, setCustomers] = useState<Customer[]>([]);
+    const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCustomer, setSelectedCustomer] = useState<Partial<Customer> | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const fetchCustomers = useCallback(async () => {
         setLoading(true);
@@ -89,18 +91,48 @@ const Customers: React.FC = () => {
         fetchCustomers();
     }, [fetchCustomers]);
 
+    useEffect(() => {
+        const lowercasedSearchTerm = searchTerm.toLowerCase().trim();
+        if (!lowercasedSearchTerm) {
+            setFilteredCustomers(customers);
+            return;
+        }
+
+        const filtered = customers.filter(customer =>
+            customer.adSoyad.toLowerCase().includes(lowercasedSearchTerm) ||
+            customer.telefon.toLowerCase().includes(lowercasedSearchTerm)
+        );
+        setFilteredCustomers(filtered);
+    }, [searchTerm, customers]);
+
     const handleSave = async (customer: Partial<Customer>) => {
         setActionLoading(true);
         const method = customer.musteriID ? 'PUT' : 'POST';
         const url = customer.musteriID ? `${API_BASE_URL}/api/Musteriler/${customer.musteriID}` : `${API_BASE_URL}/api/Musteriler`;
 
+        // Sadece gerekli alanları gönder
+        const payload = {
+            MusteriID: customer.musteriID,
+            AdSoyad: customer.adSoyad,
+            Telefon: customer.telefon
+        };
+
+        console.log('GÖNDERİLEN:', payload);
+
         try {
             const response = await fetch(url, {
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(customer)
+                body: JSON.stringify(payload)
             });
-            if (!response.ok) throw new Error('Müşteri kaydedilemedi.');
+
+            if (!response.ok) {
+                let errorText = await response.text();
+                let errorData;
+                try { errorData = JSON.parse(errorText); } catch { errorData = {}; }
+                throw new Error(errorData.message || errorText || 'Müşteri kaydedilemedi.');
+            }
+
             setIsModalOpen(false);
             setSelectedCustomer(null);
             await fetchCustomers();
@@ -133,9 +165,21 @@ const Customers: React.FC = () => {
         <div>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold text-gray-800">Müşteri Yönetimi</h1>
-                <button onClick={() => { setSelectedCustomer({}); setIsModalOpen(true); }} className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-semibold shadow-md">
-                    <i className="fas fa-plus mr-2"></i>Yeni Müşteri
-                </button>
+                <div className="flex items-center gap-4">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Müşteri Ara (Ad, Telefon)..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        />
+                        <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    <button onClick={() => { setSelectedCustomer({}); setIsModalOpen(true); }} className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-semibold shadow-md flex items-center">
+                        <i className="fas fa-plus mr-2"></i>Yeni Müşteri
+                    </button>
+                </div>
             </div>
             <div className="bg-white shadow-md rounded-lg overflow-hidden">
                 <table className="min-w-full leading-normal">
@@ -148,8 +192,8 @@ const Customers: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {Array.isArray(customers) && customers.length > 0 ? (
-                            customers.map(c => (
+                        {Array.isArray(filteredCustomers) && filteredCustomers.length > 0 ? (
+                            filteredCustomers.map(c => (
                                 <tr key={c.musteriID} className="border-b border-gray-200 hover:bg-gray-50">
                                     <td className="px-5 py-5 text-sm">
                                         <p className="text-gray-900 whitespace-no-wrap">{c.adSoyad}</p>

@@ -89,11 +89,13 @@ const NeedModal = ({ need, onClose, onSave, loading }: { need: Partial<Need> | n
 
 const Needs: React.FC = () => {
     const [needs, setNeeds] = useState<Need[]>([]);
+    const [filteredNeeds, setFilteredNeeds] = useState<Need[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedNeed, setSelectedNeed] = useState<Partial<Need> | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const fetchNeeds = useCallback(async () => {
         setLoading(true);
@@ -103,7 +105,11 @@ const Needs: React.FC = () => {
             if (!response.ok) throw new Error('İhtiyaçlar yüklenemedi');
             const data = await response.json();
             if (Array.isArray(data)) {
-                setNeeds(data);
+                const mapped = data.map((item: any) => ({
+                    ...item,
+                    ad: item.ad || item.ihtiyacTuru || ''
+                }));
+                setNeeds(mapped);
             } else {
                 console.error("API'den beklenen dizi formatı gelmedi:", data);
                 setNeeds([]); // Hata durumunda boş dizi ata
@@ -119,6 +125,20 @@ const Needs: React.FC = () => {
     useEffect(() => {
         fetchNeeds();
     }, [fetchNeeds]);
+
+    useEffect(() => {
+        const lowercasedSearchTerm = searchTerm.toLowerCase().trim();
+        if (!lowercasedSearchTerm) {
+            setFilteredNeeds(needs);
+            return;
+        }
+
+        const filtered = needs.filter(need =>
+            need.ad.toLowerCase().includes(lowercasedSearchTerm) ||
+            (need.aciklama && need.aciklama.toLowerCase().includes(lowercasedSearchTerm))
+        );
+        setFilteredNeeds(filtered);
+    }, [searchTerm, needs]);
 
     const handleSave = async () => {
         if (!selectedNeed) return;
@@ -172,9 +192,21 @@ const Needs: React.FC = () => {
         <div>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold text-gray-800">İhtiyaç ve Fiyat Yönetimi</h1>
-                <button onClick={() => { setSelectedNeed({}); setIsModalOpen(true); }} className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-semibold shadow-md">
-                    <i className="fas fa-plus mr-2"></i>Yeni İhtiyaç
-                </button>
+                <div className="flex items-center gap-4">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="İhtiyaç Ara (Ad, Açıklama)..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        />
+                        <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    <button onClick={() => { setSelectedNeed({}); setIsModalOpen(true); }} className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-semibold shadow-md flex items-center">
+                        <i className="fas fa-plus mr-2"></i>Yeni İhtiyaç
+                    </button>
+                </div>
             </div>
             <div className="bg-white shadow-md rounded-lg overflow-hidden">
                 <table className="min-w-full leading-normal">
@@ -188,7 +220,7 @@ const Needs: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {needs.map((need) => (
+                        {filteredNeeds.map((need) => (
                             <tr key={need.ihtiyacID}>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{need.ad}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

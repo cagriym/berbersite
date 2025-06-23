@@ -100,6 +100,23 @@ const MainLayout = () => {
           setMessageType('error');
           return;
         }
+        
+        // Telefon numarası kontrolü - aynı numara ile kayıtlı müşteri var mı?
+        try {
+          const customerCheckResponse = await fetch(`${API_BASE_URL}/Musteriler`);
+          if (customerCheckResponse.ok) {
+            const customers = await customerCheckResponse.json();
+            const existingCustomer = customers.find((c: any) => c.telefon === cleanedPhone);
+            if (existingCustomer) {
+              setMessage('Bu telefon numarası zaten kayıtlı! Lütfen farklı bir numara kullanın.');
+              setMessageType('error');
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Müşteri kontrolü sırasında hata:', error);
+        }
+        
         setIsSendingCode(true);
         setMessage('');
         setMessageType('');
@@ -216,7 +233,7 @@ const MainLayout = () => {
           customer: { ad: name, soyad: surname, telefon: cleanedPhone },
           appointment: {
             servisIDList: selectedServiceIds,
-            randevuZamani: appointmentDateTime.toISOString(),
+            randevuZamani: appointmentDateTime,
             aciklama: 'Randevu web sitesinden alındı.',
             ucret: totalPrice
           }
@@ -240,10 +257,33 @@ const MainLayout = () => {
               minute: '2-digit'
             });
             
-            setMessage(`Randevunuz başarıyla oluşturuldu! ${formattedDate} tarihinde saat ${formattedTime}'de randevunuz var. Sizinle en kısa sürede iletişime geçeceğiz.`);
+            // Seçilen servislerin isimlerini al
+            const selectedServices = services.filter(s => selectedServiceIds.includes(s.servisID));
+            const serviceNames = selectedServices.map(s => s.servisAdi).join(', ');
+            
+            // Detaylı başarı mesajı
+            const successMessage = `🎉 Randevunuz başarıyla oluşturuldu!
+
+📅 Tarih: ${formattedDate}
+⏰ Saat: ${formattedTime}
+👤 Ad Soyad: ${name} ${surname}
+📞 Telefon: ${phone}
+💇‍♂️ Servisler: ${serviceNames}
+💰 Toplam Ücret: ${totalPrice.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
+
+✅ Randevunuz onaylandı. Sizinle en kısa sürede iletişime geçeceğiz.
+📱 Telefon numaranızdan SMS ile bilgilendirme alacaksınız.`;
+            
+            setMessage(successMessage);
             setMessageType('success');
-            clearForm();
-            setShowAppointment(false);
+            
+            // 3 saniye sonra formu kapat
+            setTimeout(() => {
+              clearForm();
+              setShowAppointment(false);
+              setMessage('');
+              setMessageType('');
+            }, 5000);
           } else {
             const errorText = await response.text();
             setMessage(errorText || 'Randevu oluşturulurken bir hata oluştu.');
@@ -282,19 +322,21 @@ const MainLayout = () => {
             if (response.ok) {
                 const appointments = await response.json();
                 const selectedTime = appointmentDateTime.getTime();
-                
-                // Seçilen randevu zamanından 30 dakika öncesi ve sonrası
-                const conflictStart = selectedTime - (30 * 60 * 1000); // 30 dakika öncesi
-                const conflictEnd = selectedTime + (30 * 60 * 1000);   // 30 dakika sonrası
+                const selectedDate = appointmentDateTime.toDateString();
                 
                 // Aynı gün ve çakışan saatte randevu var mı kontrol et
                 const hasConflict = appointments.some((app: any) => {
                     const appTime = new Date(app.randevuZamani).getTime();
                     const appDate = new Date(app.randevuZamani).toDateString();
-                    const selectedDate = appointmentDateTime.toDateString();
                     
-                    // Aynı gün ve çakışan saat
-                    return appDate === selectedDate && appTime >= conflictStart && appTime <= conflictEnd;
+                    // Aynı gün kontrolü
+                    if (appDate !== selectedDate) return false;
+                    
+                    // 30 dakikalık çakışma kontrolü
+                    const timeDiff = Math.abs(appTime - selectedTime);
+                    const thirtyMinutes = 30 * 60 * 1000; // 30 dakika milisaniye cinsinden
+                    
+                    return timeDiff < thirtyMinutes;
                 });
                 
                 return hasConflict;
@@ -303,6 +345,41 @@ const MainLayout = () => {
             console.error('Randevu çakışması kontrol edilirken hata:', error);
         }
         return false;
+    };
+
+    // Mevcut randevuları getir ve müsait olmayan saatleri hesapla
+    const getUnavailableTimes = async (selectedDate: string): Promise<string[]> => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/Appointments`);
+            if (response.ok) {
+                const appointments = await response.json();
+                const unavailableTimes: string[] = [];
+                
+                appointments.forEach((app: any) => {
+                    const appDate = new Date(app.randevuZamani).toDateString();
+                    const selectedDateObj = new Date(selectedDate).toDateString();
+                    
+                    if (appDate === selectedDateObj) {
+                        const appTime = new Date(app.randevuZamani);
+                        const appHour = appTime.getHours();
+                        const appMinute = appTime.getMinutes();
+                        
+                        // Sadece randevu alınan saati müsait değil olarak işaretle
+                        if (appHour >= 9 && appHour <= 20) { // Çalışma saatleri
+                            const timeString = `${appHour.toString().padStart(2, '0')}:${appMinute.toString().padStart(2, '0')}`;
+                            if (!unavailableTimes.includes(timeString)) {
+                                unavailableTimes.push(timeString);
+                            }
+                        }
+                    }
+                });
+                
+                return unavailableTimes;
+            }
+        } catch (error) {
+            console.error('Müsait olmayan saatler alınırken hata:', error);
+        }
+        return [];
     };
 
     useEffect(() => {
@@ -401,6 +478,7 @@ const MainLayout = () => {
                         handleVerifyCode={handleVerifyCode}
                         handleSubmit={handleSubmit}
                         closeModal={() => setShowAppointment(false)}
+                        getUnavailableTimes={getUnavailableTimes}
                     />
                 )}
                 <section ref={contactRef} id="contact"><Contact /></section>
