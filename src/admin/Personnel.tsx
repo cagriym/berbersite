@@ -41,7 +41,6 @@ const Personnel: React.FC = () => {
     const [currentPersonnel, setCurrentPersonnel] = useState<Partial<Personel> | null>(null);
     const [showNewPositionInput, setShowNewPositionInput] = useState(false);
     const [newPosition, setNewPosition] = useState('');
-    const [customPositions, setCustomPositions] = useState<string[]>([]);
     
     // Filtreleme ve arama state'leri
     const [searchTerm, setSearchTerm] = useState('');
@@ -263,22 +262,6 @@ const Personnel: React.FC = () => {
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Pozisyon ekleme sırasında bir hata oluştu');
         }
-    };
-
-    // Mevcut personelin pozisyonunu da dahil et
-    const getAvailablePositions = () => {
-        if (!positions) return [];
-        
-        const available = [...positions.availablePositions];
-        
-        // Eğer düzenleme modundaysa, mevcut pozisyonu da ekle
-        if (currentPersonnel?.personelID && currentPersonnel?.pozisyon) {
-            if (!available.includes(currentPersonnel.pozisyon)) {
-                available.push(currentPersonnel.pozisyon);
-            }
-        }
-        
-        return available.sort();
     };
 
     return (
