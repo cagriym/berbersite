@@ -6,6 +6,7 @@ import Personnel from './Personnel';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from './Dashboard';
 import Customers from './Customers';
+import ContactMessages from './ContactMessages';
 
 interface AdminLayoutProps {
     children: React.ReactNode;
@@ -23,6 +24,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, onLogout }) => {
                     <Route path="appointments" element={<Appointments />} />
                     <Route path="needs" element={<Needs />} />
                     <Route path="personnel" element={<Personnel />} />
+                    <Route path="contact-messages" element={<ContactMessages />} />
                     <Route path="/" element={<Navigate to="dashboard" replace />} />
                 </Routes>
             </main>

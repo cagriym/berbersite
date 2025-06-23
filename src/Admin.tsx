@@ -5,6 +5,7 @@ import Dashboard from './admin/Dashboard';
 import Appointments from './admin/Appointments';
 import Customers from './admin/Customers';
 import Needs from './admin/Needs';
+import ContactMessages from './admin/ContactMessages';
 
 // Bu bileşen artık Admin.tsx içinde yer alıyor
 const Login: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
@@ -105,6 +106,7 @@ const Admin: React.FC = () => {
                 <Route path="appointments" element={<Appointments />} />
                 <Route path="customers" element={<Customers />} />
                 <Route path="needs" element={<Needs />} />
+                <Route path="contact-messages" element={<ContactMessages />} />
             </Routes>
         </AdminLayout>
     );

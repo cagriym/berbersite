@@ -1,11 +1,34 @@
 import React, { useState } from 'react';
 
+const apiUrl = process.env.REACT_APP_API_URL;
+
 const Contact = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
-  const handleSubmit = (e: React.FormEvent) => {
+  const [error, setError] = useState('');
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
+    setError('');
+    try {
+      const response = await fetch(`${apiUrl}/contactmessages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message })
+      });
+      if (response.ok) {
+        setSent(true);
+        setName('');
+        setEmail('');
+        setMessage('');
+        setTimeout(() => setSent(false), 4000);
+      } else {
+        setError('Mesaj gönderilemedi. Lütfen tekrar deneyin.');
+      }
+    } catch {
+      setError('Sunucuya ulaşılamıyor.');
+    }
   };
   return (
     <div className="min-h-[40vh] flex flex-col justify-center items-center bg-gradient-to-br from-amber-50 to-orange-100 pt-12 pb-8">
@@ -24,11 +47,12 @@ const Contact = () => {
           <div className="flex-1">
             <h3 className="text-lg font-bold text-amber-800 mb-2">Bize Ulaşın</h3>
             <form className="space-y-4" onSubmit={handleSubmit}>
-              <input type="text" placeholder="Adınız" className="w-full px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-amber-500" required />
-              <input type="email" placeholder="E-posta" className="w-full px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-amber-500" required />
-              <textarea placeholder="Mesajınız" className="w-full px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-amber-500" rows={4} required></textarea>
+              <input type="text" placeholder="Adınız" className="w-full px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-amber-500" required value={name} onChange={e => setName(e.target.value)} />
+              <input type="email" placeholder="E-posta" className="w-full px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-amber-500" required value={email} onChange={e => setEmail(e.target.value)} />
+              <textarea placeholder="Mesajınız" className="w-full px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-amber-500" rows={4} required value={message} onChange={e => setMessage(e.target.value)}></textarea>
               <button type="submit" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-lg shadow transition">Gönder</button>
               {sent && <div className="text-green-700 bg-green-100 rounded-lg p-2 mt-2 text-center font-semibold">Mesajınız başarıyla gönderildi!</div>}
+              {error && <div className="text-red-700 bg-red-100 rounded-lg p-2 mt-2 text-center font-semibold">{error}</div>}
             </form>
           </div>
         </div>
