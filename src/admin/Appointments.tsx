@@ -61,7 +61,6 @@ const Appointments: React.FC = () => {
     const [selectedServices, setSelectedServices] = useState<number[]>([]);
     const [description, setDescription] = useState('');
     const [totalPrice, setTotalPrice] = useState(0);
-    const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
     const [conflictInfo, setConflictInfo] = useState<string>('');
 
     const fetchAppointments = useCallback(async () => {
@@ -194,7 +193,7 @@ const Appointments: React.FC = () => {
     // Tarih değiştiğinde müsait olmayan saatleri güncelle
     useEffect(() => {
         if (selectedDate) {
-            getUnavailableTimes(selectedDate).then(setUnavailableTimes);
+            getUnavailableTimes(selectedDate);
         }
     }, [selectedDate, getUnavailableTimes]);
 
@@ -218,7 +217,7 @@ const Appointments: React.FC = () => {
         if (showCreateModal) {
             fetchServices();
             fetchCustomers();
-            getUnavailableTimes(selectedDate).then(setUnavailableTimes);
+            getUnavailableTimes(selectedDate);
         }
     }, [showCreateModal, fetchServices, fetchCustomers, getUnavailableTimes, selectedDate]);
 
