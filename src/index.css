@@ -9,6 +9,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #fff;
+  color: #111;
 }
 
 code {
@@ -16,7 +18,7 @@ code {
     monospace;
 }
 
-/* Animasyonlar (tailwind.config.js'de extend edildi) */
+/* Animasyonlar */
 .animate-spin-slow {
   animation: spin-slow 12s linear infinite;
 }
@@ -57,12 +59,35 @@ section, .section, .min-h-screen, .min-h-\[60vh\] {
   }
 }
 
-.bg-white\/80 {
-  background-color: rgba(255,255,255,0.80) !important;
+/* Dark mode backdrop blur */
+.bg-dark\/80 {
+  background-color: rgba(15, 23, 42, 0.80) !important;
 }
 
 .backdrop-blur-sm {
   backdrop-filter: blur(4px) !important;
+}
+
+/* Form elementleri için dark mode - sadece ana site için */
+/* Admin paneli hariç tutuldu */
+body:not([data-admin="true"]) input,
+body:not([data-admin="true"]) textarea,
+body:not([data-admin="true"]) select {
+  background-color: #fff !important;
+  border-color: #ccc !important;
+  color: #111 !important;
+}
+
+body:not([data-admin="true"]) input:focus,
+body:not([data-admin="true"]) textarea:focus,
+body:not([data-admin="true"]) select:focus {
+  border-color: #eab308 !important;
+  box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1) !important;
+}
+
+body:not([data-admin="true"]) input::placeholder,
+body:not([data-admin="true"]) textarea::placeholder {
+  color: #888 !important;
 }
 
 /* Galeriye özel stil kaldırıldı */

@@ -228,7 +228,7 @@ const Dashboard: React.FC = () => {
                     <h2 className="text-xl font-semibold text-gray-900">Mali Durum</h2>
                     <div className="flex items-center space-x-2">
                         <label className="text-sm font-medium text-gray-700">Ay Seçin:</label>
-                        <select
+                        <select 
                             value={selectedMonth ? `${selectedMonth.year}-${selectedMonth.month}` : ''}
                             onChange={(e) => {
                                 const [year, month] = e.target.value.split('-').map(Number);
@@ -244,7 +244,7 @@ const Dashboard: React.FC = () => {
                         </select>
                     </div>
                 </div>
-
+                
                 {financialData && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* Gelir */}

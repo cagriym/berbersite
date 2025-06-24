@@ -443,7 +443,7 @@ const Appointments: React.FC = () => {
                             placeholder="Arama yap..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-black"
                         />
                     </div>
                     <div>
@@ -452,7 +452,7 @@ const Appointments: React.FC = () => {
                             type="date"
                             value={searchDate}
                             onChange={(e) => setSearchDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-black"
                         />
                     </div>
                     <div>
@@ -461,7 +461,7 @@ const Appointments: React.FC = () => {
                             type="time"
                             value={searchTime}
                             onChange={(e) => setSearchTime(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-black"
                         />
                     </div>
                 </div>
@@ -591,7 +591,7 @@ const Appointments: React.FC = () => {
                                     <select
                                         value={selectedCustomer}
                                         onChange={(e) => setSelectedCustomer(e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-black"
                                     >
                                         <option value="">Müşteri Seçin</option>
                                         {customers.map(customer => (
@@ -611,7 +611,7 @@ const Appointments: React.FC = () => {
                                                 type="text"
                                                 value={newCustomerName}
                                                 onChange={(e) => setNewCustomerName(e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-black"
                                                 placeholder="Ad Soyad"
                                             />
                                         </div>
@@ -621,7 +621,7 @@ const Appointments: React.FC = () => {
                                                 type="tel"
                                                 value={newCustomerPhone}
                                                 onChange={(e) => setNewCustomerPhone(e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-black"
                                                 placeholder="5XX XXX XX XX"
                                             />
                                         </div>
@@ -637,7 +637,7 @@ const Appointments: React.FC = () => {
                                             value={selectedDate}
                                             onChange={(e) => setSelectedDate(e.target.value)}
                                             min={new Date().toISOString().split('T')[0]}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-black"
                                         />
                                     </div>
                                     <div>
@@ -645,7 +645,7 @@ const Appointments: React.FC = () => {
                                         <select
                                             value={selectedTime}
                                             onChange={(e) => setSelectedTime(e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-black"
                                         >
                                             {Array.from({ length: 24 }, (_, hour) => 
                                                 Array.from({ length: 2 }, (_, minute) => {
@@ -685,7 +685,7 @@ const Appointments: React.FC = () => {
                                                     }}
                                                     className="rounded"
                                                 />
-                                                <span className="text-sm">
+                                                <span className="text-sm text-gray-900">
                                                     {service.servisAdi} - {service.varsayilanUcret?.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) || 'Ücret Belirtilmemiş'}
                                                 </span>
                                             </label>
@@ -699,7 +699,7 @@ const Appointments: React.FC = () => {
                                     <textarea
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-black"
                                         rows={3}
                                         placeholder="Randevu açıklaması..."
                                     />

@@ -43,31 +43,35 @@ const ContactMessages: React.FC = () => {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">İletişim Mesajları</h2>
-      {loading && <div>Yükleniyor...</div>}
-      {error && <div className="text-red-600">{error}</div>}
+      <h2 className="text-2xl font-bold mb-4 text-gray-900">İletişim Mesajları</h2>
+      {loading && <div className="text-gray-700">Yükleniyor...</div>}
+      {error && <div className="text-red-600 bg-red-100 p-3 rounded-lg">{error}</div>}
       {!loading && !error && (
         <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+          <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
             <thead>
-              <tr>
-                <th className="px-4 py-2 border-b">Ad</th>
-                <th className="px-4 py-2 border-b">E-posta</th>
-                <th className="px-4 py-2 border-b">Mesaj</th>
-                <th className="px-4 py-2 border-b">Tarih</th>
+              <tr className="bg-gray-50">
+                <th className="px-4 py-3 border-b border-gray-200 text-left text-sm font-semibold text-gray-900">Ad</th>
+                <th className="px-4 py-3 border-b border-gray-200 text-left text-sm font-semibold text-gray-900">E-posta</th>
+                <th className="px-4 py-3 border-b border-gray-200 text-left text-sm font-semibold text-gray-900">Mesaj</th>
+                <th className="px-4 py-3 border-b border-gray-200 text-left text-sm font-semibold text-gray-900">Tarih</th>
               </tr>
             </thead>
             <tbody>
               {messages.map(msg => (
-                <tr key={msg.id}>
-                  <td className="px-4 py-2 border-b font-semibold">{msg.name}</td>
-                  <td className="px-4 py-2 border-b">{msg.email}</td>
-                  <td className="px-4 py-2 border-b">{msg.message}</td>
-                  <td className="px-4 py-2 border-b text-sm text-gray-500">{new Date(msg.createdAt).toLocaleString('tr-TR')}</td>
+                <tr key={msg.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 border-b border-gray-200 font-semibold text-gray-900">{msg.name}</td>
+                  <td className="px-4 py-3 border-b border-gray-200 text-gray-700">{msg.email}</td>
+                  <td className="px-4 py-3 border-b border-gray-200 text-gray-700 max-w-xs truncate">{msg.message}</td>
+                  <td className="px-4 py-3 border-b border-gray-200 text-sm text-gray-600">{new Date(msg.createdAt).toLocaleString('tr-TR')}</td>
                 </tr>
               ))}
               {messages.length === 0 && (
-                <tr><td colSpan={4} className="text-center py-4 text-gray-500">Hiç mesaj yok.</td></tr>
+                <tr>
+                  <td colSpan={4} className="text-center py-8 text-gray-500 bg-gray-50">
+                    Henüz hiç mesaj yok.
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>

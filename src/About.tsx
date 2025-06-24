@@ -18,21 +18,21 @@ const About = () => {
     };
 
     return (
-        <div id="about-section" className="py-20 px-4 sm:px-8 bg-white">
+        <div id="about-section" className="py-20 px-4 sm:px-8 bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900">
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div className="text-gray-700">
-                    <h2 className="text-4xl font-bold text-amber-900 mb-4">Hakkımızda</h2>
-                    <p className="mb-4">
+                <div className="text-dark-200">
+                    <h2 className="text-4xl font-bold text-dark-100 mb-4">Hakkımızda</h2>
+                    <p className="mb-4 text-dark-300 leading-relaxed">
                         Oktay Saç Tasarım olarak, yılların verdiği tecrübe ve sanatsal bakış açımızla sizlere en iyi hizmeti sunmaktan gurur duyuyoruz. Misyonumuz, her müşterimizin kendini özel ve yenilenmiş hissetmesini sağlamaktır. Salonumuzda kullandığımız yüksek kaliteli ürünler ve modern tekniklerle, tarzınıza en uygun saç kesimini, renklendirmeyi ve bakımı sunuyoruz.
                     </p>
-                    <p>
+                    <p className="text-dark-300 leading-relaxed">
                         Sıcak ve samimi bir ortamda, profesyonel ekibimizle tanışmak ve size özel hizmetlerimizden yararlanmak için randevunuzu bugün alın.
                     </p>
                 </div>
                 <div className="w-full max-w-md mx-auto">
                     <Slider {...settings}>
                         <div>
-                            <img src="/oktayberber5.png" alt="Oktay Berber 5" className="rounded-lg shadow-lg w-full h-96 object-cover" />
+                            <img src="/oktayberber5.png" alt="Oktay Berber 5" className="rounded-lg shadow-2xl w-full h-96 object-cover border border-dark-600" />
                         </div>
                     </Slider>
                 </div>

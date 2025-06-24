@@ -266,7 +266,7 @@ const Personnel: React.FC = () => {
 
     return (
         <div className="container mx-auto p-4">
-            <h1 className="text-3xl font-bold mb-6 text-white">Personel Yönetimi</h1>
+            <h1 className="text-3xl font-bold mb-6 text-black">Personel Yönetimi</h1>
             {/* İstatistikler */}
             {stats && (
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -325,15 +325,15 @@ const Personnel: React.FC = () => {
             )}
 
             {/* Filtreler */}
-            <div className="bg-gray-800 shadow-md rounded-lg p-4 mt-6">
+            <div className="bg-white shadow-md rounded-lg p-4 mt-6">
                 <div className="flex flex-col md:flex-row gap-4 mb-4 justify-between items-center">
                     <div className="flex-1">
-                        <div className="flex items-center bg-gray-700 rounded-md p-2">
+                        <div className="flex items-center bg-white border border-gray-300 rounded-md p-2">
                             <FaSearch className="text-gray-400 mr-2" />
                             <input
                                 type="text"
                                 placeholder="Personel ara (Ad, Pozisyon, Telefon...)"
-                                className="bg-transparent focus:outline-none w-full text-white"
+                                className="bg-white focus:outline-none w-full text-black"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -341,7 +341,7 @@ const Personnel: React.FC = () => {
                     </div>
                     <div className="flex gap-4">
                         <select
-                            className="bg-gray-700 text-white rounded-md p-2 focus:outline-none"
+                            className="bg-white border border-gray-300 text-black rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
                         >
@@ -350,7 +350,7 @@ const Personnel: React.FC = () => {
                             <option value="inactive">Pasif</option>
                         </select>
                         <select
-                            className="bg-gray-700 text-white rounded-md p-2 focus:outline-none"
+                            className="bg-white border border-gray-300 text-black rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value as 'name' | 'date' | 'position')}
                         >

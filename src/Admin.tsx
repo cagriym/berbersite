@@ -26,15 +26,15 @@ const Login: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 font-sans">
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 font-sans" data-admin="true">
             <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
                 <div className="text-center">
-                    <img src="/logo192.png" alt="Logo" className="w-24 h-24 mx-auto rounded-full mb-4" />
+                    <img src="/logo192.png" alt="Logo" className="w-24 h-24 mx-auto rounded-full mb-4 border-2 border-amber-200" />
                     <h2 className="text-3xl font-bold text-gray-800">Admin Paneli Girişi</h2>
                 </div>
 
                 {error && (
-                    <div className="p-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+                    <div className="p-4 text-sm text-red-700 bg-red-100 rounded-lg border border-red-200" role="alert">
                         {error}
                     </div>
                 )}
@@ -47,7 +47,7 @@ const Login: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
                             id="username"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full px-4 py-3 mt-2 text-gray-700 bg-gray-50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            className="w-full px-4 py-3 mt-2 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                             required
                         />
                     </div>
@@ -58,13 +58,13 @@ const Login: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
                             id="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-3 mt-2 text-gray-700 bg-gray-50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            className="w-full px-4 py-3 mt-2 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                             required
                         />
                     </div>
                     <button 
                         type="submit" 
-                        className="w-full px-4 py-3 font-bold text-white bg-amber-600 rounded-lg hover:bg-amber-700 focus:outline-none focus:ring-4 focus:ring-amber-300"
+                        className="w-full px-4 py-3 font-bold text-white bg-amber-600 rounded-lg hover:bg-amber-700 focus:outline-none focus:ring-4 focus:ring-amber-300 transition-colors duration-200"
                     >
                         Giriş Yap
                     </button>
@@ -99,16 +99,18 @@ const Admin: React.FC = () => {
     }
 
     return (
-        <AdminLayout onLogout={handleLogout}>
-            <Routes>
-                <Route index element={<Navigate to="dashboard" replace />} />
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="appointments" element={<Appointments />} />
-                <Route path="customers" element={<Customers />} />
-                <Route path="needs" element={<Needs />} />
-                <Route path="contact-messages" element={<ContactMessages />} />
-            </Routes>
-        </AdminLayout>
+        <div data-admin="true">
+            <AdminLayout onLogout={handleLogout}>
+                <Routes>
+                    <Route index element={<Navigate to="dashboard" replace />} />
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="appointments" element={<Appointments />} />
+                    <Route path="customers" element={<Customers />} />
+                    <Route path="needs" element={<Needs />} />
+                    <Route path="contact-messages" element={<ContactMessages />} />
+                </Routes>
+            </AdminLayout>
+        </div>
     );
 };
 

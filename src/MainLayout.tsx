@@ -36,16 +36,16 @@ function StilGalerisiSlider() {
         <div className="w-full max-w-md mx-auto">
             <Slider {...settings}>
                 <div>
-                    <img src="/oktayberber1.png" alt="Oktay Berber 1" className="rounded-lg shadow-lg w-full h-96 object-cover" />
+                    <img src="/oktayberber1.png" alt="Oktay Berber 1" className="rounded-lg shadow-2xl w-full h-96 object-cover border border-dark-600" />
                 </div>
                 <div>
-                    <img src="/oktayberber2.png" alt="Oktay Berber 2" className="rounded-lg shadow-lg w-full h-96 object-cover" />
+                    <img src="/oktayberber2.png" alt="Oktay Berber 2" className="rounded-lg shadow-2xl w-full h-96 object-cover border border-dark-600" />
                 </div>
                 <div>
-                    <img src="/oktayberber3.png" alt="Oktay Berber 3" className="rounded-lg shadow-lg w-full h-96 object-cover" />
+                    <img src="/oktayberber3.png" alt="Oktay Berber 3" className="rounded-lg shadow-2xl w-full h-96 object-cover border border-dark-600" />
                 </div>
                 <div>
-                    <img src="/oktayberber4.png" alt="Oktay Berber 4" className="rounded-lg shadow-lg w-full h-96 object-cover" />
+                    <img src="/oktayberber4.png" alt="Oktay Berber 4" className="rounded-lg shadow-2xl w-full h-96 object-cover border border-dark-600" />
                 </div>
             </Slider>
         </div>
@@ -200,97 +200,67 @@ const MainLayout = () => {
           setLoading(false);
           return;
         }
-        const cleanedPhone = phone.replace(/\D/g, '');
-        if (cleanedPhone.length !== 10) {
-          setMessage('Lütfen geçerli bir 10 haneli telefon numarası girin.');
-          setMessageType('error');
-          setLoading(false);
-          return;
-        }
-        const appointmentDateTime = new Date(`${selectedDate}T${selectedTime}`);
-        if (isNaN(appointmentDateTime.getTime())) {
-          setMessage('Geçersiz tarih veya saat formatı.');
-          setMessageType('error');
-          setLoading(false);
-          return;
-        }
-        if (appointmentDateTime < new Date()) {
-          setMessage('Geçmiş bir tarihe veya saate randevu alamazsınız.');
-          setMessageType('error');
-          setLoading(false);
-          return;
-        }
-        
-        // Randevu çakışması kontrolü
-        const hasConflict = await checkAppointmentConflict(appointmentDateTime);
-        if (hasConflict) {
-          setMessage('Seçilen randevu zamanında randevu var. Lütfen başka bir tarih veya saat seçin.');
-          setMessageType('error');
-          setLoading(false);
-          return;
-        }
-        const randevuData = {
-          customer: { ad: name, soyad: surname, telefon: cleanedPhone },
-          appointment: {
-            servisIDList: selectedServiceIds,
-            randevuZamani: appointmentDateTime,
-            aciklama: 'Randevu web sitesinden alındı.',
-            ucret: totalPrice
-          }
-        };
+
         try {
-          const response = await fetch(`${API_BASE_URL}/Appointments`, {
+          // Müşteri oluştur
+          const customerResponse = await fetch(`${API_BASE_URL}/Musteriler`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(randevuData)
+            body: JSON.stringify({
+              ad: name.trim(),
+              soyad: surname.trim(),
+              telefon: phone.replace(/\D/g, ''),
+            }),
           });
-          if (response.ok) {
-            // Tarih ve saati Türkçe formatında formatla
-            const formattedDate = appointmentDateTime.toLocaleDateString('tr-TR', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            });
-            const formattedTime = appointmentDateTime.toLocaleTimeString('tr-TR', {
-              hour: '2-digit',
-              minute: '2-digit'
-            });
-            
-            // Seçilen servislerin isimlerini al
-            const selectedServices = services.filter(s => selectedServiceIds.includes(s.servisID));
-            const serviceNames = selectedServices.map(s => s.servisAdi).join(', ');
-            
-            // Detaylı başarı mesajı
-            const successMessage = `🎉 Randevunuz başarıyla oluşturuldu!
 
-📅 Tarih: ${formattedDate}
-⏰ Saat: ${formattedTime}
-👤 Ad Soyad: ${name} ${surname}
-📞 Telefon: ${phone}
-💇‍♂️ Servisler: ${serviceNames}
-💰 Toplam Ücret: ${totalPrice.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
-
-✅ Randevunuz onaylandı. Sizinle en kısa sürede iletişime geçeceğiz.
-📱 Telefon numaranızdan SMS ile bilgilendirme alacaksınız.`;
-            
-            setMessage(successMessage);
-            setMessageType('success');
-            
-            // 3 saniye sonra formu kapat
-            setTimeout(() => {
-              clearForm();
-              setShowAppointment(false);
-              setMessage('');
-              setMessageType('');
-            }, 5000);
-          } else {
-            const errorText = await response.text();
-            setMessage(errorText || 'Randevu oluşturulurken bir hata oluştu.');
-            setMessageType('error');
+          if (!customerResponse.ok) {
+            throw new Error('Müşteri oluşturulamadı');
           }
-        } catch (error: any) {
-          setMessage(`Bir ağ hatası oluştu: ${error.message}`);
+
+          const customerData = await customerResponse.json();
+          const musteriID = customerData.musteriID;
+
+          // Randevu oluştur
+          const appointmentDateTime = new Date(`${selectedDate}T${selectedTime}`);
+          const appointmentResponse = await fetch(`${API_BASE_URL}/Appointments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              musteriID: musteriID,
+              randevuZamani: appointmentDateTime.toISOString(),
+              ucret: totalPrice,
+              tamamlandimi: false,
+            }),
+          });
+
+          if (!appointmentResponse.ok) {
+            throw new Error('Randevu oluşturulamadı');
+          }
+
+          const appointmentData = await appointmentResponse.json();
+          const randevuID = appointmentData.randevuID;
+
+          // Randevu detayları oluştur
+          const detailPromises = selectedServiceIds.map(servisID =>
+            fetch(`${API_BASE_URL}/RandevuDetaylari`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                randevuID: randevuID,
+                servisID: servisID,
+              }),
+            })
+          );
+
+          await Promise.all(detailPromises);
+
+          setMessage(`Randevunuz başarıyla oluşturuldu!\n\nRandevu Detayları:\nAd Soyad: ${name} ${surname}\nTarih: ${selectedDate}\nSaat: ${selectedTime}\nToplam Ücret: ${totalPrice.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}\n\nRandevu numaranız: ${randevuID}`);
+          setMessageType('success');
+          clearForm();
+          setShowAppointment(false);
+        } catch (error) {
+          console.error('Randevu oluşturulurken hata:', error);
+          setMessage('Randevu oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
           setMessageType('error');
         } finally {
           setLoading(false);
