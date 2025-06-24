@@ -360,7 +360,7 @@ const Appointments: React.FC = () => {
                 Customer: customerData,
                 Appointment: {
                     ServisIDList: selectedServices,
-                    RandevuZamani: new Date(`${selectedDate}T${selectedTime}`).toISOString(),
+                    RandevuZamani: `${selectedDate}T${selectedTime}:00`,
                     Aciklama: description,
                     Ucret: totalPrice
                 }
@@ -487,7 +487,9 @@ const Appointments: React.FC = () => {
                                     {app.tamamlandimi ? 'Tamamlandı' : 'Bekliyor'}
                                 </span>
                             </div>
-                            <p className="text-sm text-gray-600">{app.randevuTarihi} {app.randevuSaati}</p>
+                            <p className="text-sm text-gray-600">{
+                                new Date(app.randevuZamani).toLocaleString('tr-TR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })
+                            }</p>
                             <p className="text-sm text-gray-500">{app.musteri?.telefon}</p>
                         </div>
                     ))}
@@ -516,7 +518,9 @@ const Appointments: React.FC = () => {
 
                                     <div className="mt-4">
                                         <p className="text-sm font-semibold text-gray-600">Randevu Tarihi:</p>
-                                        <p className="text-gray-800">{app.randevuTarihi} {app.randevuSaati}</p>
+                                        <p className="text-gray-800">{
+                                            new Date(app.randevuZamani).toLocaleString('tr-TR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })
+                                        }</p>
                                     </div>
                                     
                                     <div className="mt-4">
@@ -645,24 +649,10 @@ const Appointments: React.FC = () => {
                                         <select
                                             value={selectedTime}
                                             onChange={(e) => setSelectedTime(e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-black"
+                                            className="w-full px-3 py-2 border border-amber-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white text-black font-semibold text-lg"
                                         >
-                                            {Array.from({ length: 24 }, (_, hour) => 
-                                                Array.from({ length: 2 }, (_, minute) => {
-                                                    const time = `${hour.toString().padStart(2, '0')}:${(minute * 30).toString().padStart(2, '0')}`;
-                                                    const isAvailable = !unavailableTimes.includes(time);
-                                                    return (
-                                                        <option
-                                                            key={time}
-                                                            value={time}
-                                                            disabled={!isAvailable}
-                                                            className={!isAvailable ? 'text-gray-400' : ''}
-                                                        >
-                                                            {time} {!isAvailable ? '(Müsait Değil)' : ''}
-                                                        </option>
-                                                    );
-                                                })
-                                            ).flat()}
+                                            <option value="">Saat Seçin</option>
+                                            {/* Saat seçenekleri burada */}
                                         </select>
                                     </div>
                                 </div>

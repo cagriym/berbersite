@@ -33,19 +33,19 @@ function StilGalerisiSlider() {
     };
 
     return (
-        <div className="w-full max-w-md mx-auto">
+        <div className="w-full max-w-2xl mx-auto">
             <Slider {...settings}>
-                <div>
-                    <img src="/oktayberber1.png" alt="Oktay Berber 1" className="rounded-lg shadow-2xl w-full h-96 object-cover border border-dark-600" />
+                <div className="p-0 m-0 bg-transparent overflow-hidden">
+                    <img src="/oktayberber1.png" alt="Oktay Berber 1" className="w-full h-[500px] object-cover rounded-lg" />
                 </div>
-                <div>
-                    <img src="/oktayberber2.png" alt="Oktay Berber 2" className="rounded-lg shadow-2xl w-full h-96 object-cover border border-dark-600" />
+                <div className="p-0 m-0 bg-transparent overflow-hidden">
+                    <img src="/oktayberber2.png" alt="Oktay Berber 2" className="w-full h-[500px] object-cover rounded-lg" />
                 </div>
-                <div>
-                    <img src="/oktayberber3.png" alt="Oktay Berber 3" className="rounded-lg shadow-2xl w-full h-96 object-cover border border-dark-600" />
+                <div className="p-0 m-0 bg-transparent overflow-hidden">
+                    <img src="/oktayberber3.png" alt="Oktay Berber 3" className="w-full h-[500px] object-cover rounded-lg" />
                 </div>
-                <div>
-                    <img src="/oktayberber4.png" alt="Oktay Berber 4" className="rounded-lg shadow-2xl w-full h-96 object-cover border border-dark-600" />
+                <div className="p-0 m-0 bg-transparent overflow-hidden">
+                    <img src="/oktayberber4.png" alt="Oktay Berber 4" className="w-full h-[500px] object-cover rounded-lg" />
                 </div>
             </Slider>
         </div>
@@ -285,38 +285,6 @@ const MainLayout = () => {
         }
     }, []);
 
-    // Randevu çakışması kontrolü
-    const checkAppointmentConflict = async (appointmentDateTime: Date): Promise<boolean> => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/Appointments`);
-            if (response.ok) {
-                const appointments = await response.json();
-                const selectedTime = appointmentDateTime.getTime();
-                const selectedDate = appointmentDateTime.toDateString();
-                
-                // Aynı gün ve çakışan saatte randevu var mı kontrol et
-                const hasConflict = appointments.some((app: any) => {
-                    const appTime = new Date(app.randevuZamani).getTime();
-                    const appDate = new Date(app.randevuZamani).toDateString();
-                    
-                    // Aynı gün kontrolü
-                    if (appDate !== selectedDate) return false;
-                    
-                    // 30 dakikalık çakışma kontrolü
-                    const timeDiff = Math.abs(appTime - selectedTime);
-                    const thirtyMinutes = 30 * 60 * 1000; // 30 dakika milisaniye cinsinden
-                    
-                    return timeDiff < thirtyMinutes;
-                });
-                
-                return hasConflict;
-            }
-        } catch (error) {
-            console.error('Randevu çakışması kontrol edilirken hata:', error);
-        }
-        return false;
-    };
-
     // Mevcut randevuları getir ve müsait olmayan saatleri hesapla
     const getUnavailableTimes = async (selectedDate: string): Promise<string[]> => {
         try {
@@ -412,11 +380,13 @@ const MainLayout = () => {
             <main className="flex-grow pt-16">
                 <section ref={homeRef} id="home"><Home scrollToSection={scrollToSection} setShowAppointment={setShowAppointment} /></section>
                 <section ref={aboutRef} id="about"><About /></section>
-                <div className="container mx-auto px-4 py-12">
-                    <h2 className="text-4xl font-bold text-center text-amber-800 mb-12">Stil Galerimiz</h2>
-                    <div className="flex justify-center">
-                        <StilGalerisiSlider />
+                {/* Stil Galerimiz Bölümü */}
+                <div className="w-full py-16 px-2 bg-[#1a2236]">
+                  <div className="max-w-3xl mx-auto rounded-xl shadow-lg bg-[#fdf9ea] flex justify-center items-center" style={{ minHeight: '650px' }}>
+                    <div className="w-full flex justify-center items-center pt-20 pb-8">
+                      <StilGalerisiSlider />
                     </div>
+                  </div>
                 </div>
                 <section ref={servicesRef} id="services"><Services services={services} /></section>
                 {showAppointment && (

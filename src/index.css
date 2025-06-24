@@ -91,3 +91,9 @@ body:not([data-admin="true"]) textarea::placeholder {
 }
 
 /* Galeriye özel stil kaldırıldı */
+
+select, select option {
+  color: #000 !important;
+  background: #fff !important;
+  font-weight: bold;
+}
